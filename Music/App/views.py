@@ -8,6 +8,8 @@ from youtube_search import YoutubeSearch
 from youtubesearchpython import VideosSearch
 from spotipy.oauth2 import SpotifyClientCredentials
 import youtube_dl
+from tube_dl import Youtube
+import pytube
 
 # custom packages import
 from YouPy import YouTubeItem
@@ -273,17 +275,13 @@ def more(request,song_url,title):
     url here.
     '''
     if song_url=='1':
-        results1 = YoutubeSearch(artist+" "+title, max_results=1).to_dict()
+        results1 = VideosSearch(title, limit=3).result()['result']
         song_url=results1[0]['id']
     search_form = SearchForm()
-    url = 'http://www.youtube.com/watch?v=' + str(song_url)
-    real_url=YouTubeItem(url, request_headers={
-        'cookie': 'VISITOR_INFO1_LIVE=IUdXkQ1imu0; CONSENT=YES+BG.bg+20150830-14-0; PREF=f4=4000000&al=bg&f1=50000000&f5=30030; LOGIN_INFO=AFmmF2swRQIhANxn7BDmIPCoLmoU2bLX6ZBjkWAR2ZIDUqW7KCU0OcTXAiBvuT2VlzAqbRsWIQe7kpkj0f970YKGjngGb7xZ4bhSqw:QUQ3MjNmeEVwUVY2ZVBfSVBKQVJkRVRuY055cEJpenVEMUQ3LUROSjBuVlF0ZjhDTGxnUFI5bFJhcHg0MzRQRjFFWDFCTFY5Z0dSaWRhOE5ja2FRTUZDZ2JuSjNjNGhhMWJYUkxwVDVNN095eUdwVlNqcVhsTS14NDltOXF4RFpnbjQxZk9DX0MyYm5ZN29mYVdYTWtOZTNQVUV2bFNNSGIxQmlOVXRUNm90OE9UZFhrNmVjLVlJ; SID=xQc0wBkRLgQJt3RONGwfIMNVNBbJ1hHAI9OLKWy4R5--GPWOQKhSBwKP4e9HWAD71eTYZQ.; __Secure-3PSID=xQc0wBkRLgQJt3RONGwfIMNVNBbJ1hHAI9OLKWy4R5--GPWOFMGUjC44_KS-OCkkFGagRA.; HSID=ACkf8eiNtJrbQxxLQ; SSID=AgHMJIxheUPFCTQeF; APISID=iqC5Jg1qKdLaxzwH/A7tfqXKHpbllbat7Y; SAPISID=ZTUCKejsG3jbMsSI/AiW4-j0WTTrm-1QM8; __Secure-HSID=ACkf8eiNtJrbQxxLQ; __Secure-SSID=AgHMJIxheUPFCTQeF; __Secure-APISID=iqC5Jg1qKdLaxzwH/A7tfqXKHpbllbat7Y; __Secure-3PAPISID=ZTUCKejsG3jbMsSI/AiW4-j0WTTrm-1QM8; SIDCC=AJi4QfFsSW5aWfVzGCZr_WFYcRtrBQr_tCpYdx70q7XRs3Io3PT9fSpVZZtyWPi1WY7QO4Bg0KY'
-    }).streams.filter(only_audio=True).first().url
+    url = 'https://www.youtube.com/watch?v=' + str(song_url)
+    real_url = pytube.YouTube(url).streams.filter(only_audio=True)[0].url
     if image=='':
-        image=YouTubeItem(url, request_headers={
-            'cookie': 'VISITOR_INFO1_LIVE=IUdXkQ1imu0; CONSENT=YES+BG.bg+20150830-14-0; PREF=f4=4000000&al=bg&f1=50000000&f5=30030; LOGIN_INFO=AFmmF2swRQIhANxn7BDmIPCoLmoU2bLX6ZBjkWAR2ZIDUqW7KCU0OcTXAiBvuT2VlzAqbRsWIQe7kpkj0f970YKGjngGb7xZ4bhSqw:QUQ3MjNmeEVwUVY2ZVBfSVBKQVJkRVRuY055cEJpenVEMUQ3LUROSjBuVlF0ZjhDTGxnUFI5bFJhcHg0MzRQRjFFWDFCTFY5Z0dSaWRhOE5ja2FRTUZDZ2JuSjNjNGhhMWJYUkxwVDVNN095eUdwVlNqcVhsTS14NDltOXF4RFpnbjQxZk9DX0MyYm5ZN29mYVdYTWtOZTNQVUV2bFNNSGIxQmlOVXRUNm90OE9UZFhrNmVjLVlJ; SID=xQc0wBkRLgQJt3RONGwfIMNVNBbJ1hHAI9OLKWy4R5--GPWOQKhSBwKP4e9HWAD71eTYZQ.; __Secure-3PSID=xQc0wBkRLgQJt3RONGwfIMNVNBbJ1hHAI9OLKWy4R5--GPWOFMGUjC44_KS-OCkkFGagRA.; HSID=ACkf8eiNtJrbQxxLQ; SSID=AgHMJIxheUPFCTQeF; APISID=iqC5Jg1qKdLaxzwH/A7tfqXKHpbllbat7Y; SAPISID=ZTUCKejsG3jbMsSI/AiW4-j0WTTrm-1QM8; __Secure-HSID=ACkf8eiNtJrbQxxLQ; __Secure-SSID=AgHMJIxheUPFCTQeF; __Secure-APISID=iqC5Jg1qKdLaxzwH/A7tfqXKHpbllbat7Y; __Secure-3PAPISID=ZTUCKejsG3jbMsSI/AiW4-j0WTTrm-1QM8; SIDCC=AJi4QfFsSW5aWfVzGCZr_WFYcRtrBQr_tCpYdx70q7XRs3Io3PT9fSpVZZtyWPi1WY7QO4Bg0KY'
-        }).thumbnail_url
+        image=Youtube(url).thumbnail
 
     # get all song details together
     details = {'popularity': song_popularity,
