@@ -1,3 +1,4 @@
+import django_heroku
 """
 Django settings for Music project.
 
@@ -125,3 +126,5 @@ LOGOUT_REDIRECT_URL = ''
 MEDIA_URL='/media/'
 MEDIA_ROOT='media'
 YOUTUBE_DATA_API_KEY='AIzaSyBZlAtSmPp61IkMMi7f7Rf_Ft4qkWrN1D0'
+
+django_heroku.settings(locals())
