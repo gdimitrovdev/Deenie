@@ -11,9 +11,6 @@ import youtube_dl
 from tube_dl import Youtube
 import pytube
 
-# custom packages import
-from YouPy import YouTubeItem
-
 # Django imports
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
