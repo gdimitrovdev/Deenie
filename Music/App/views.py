@@ -5,6 +5,7 @@ import random
 import pafy
 import spotipy
 from youtube_search import YoutubeSearch
+from youtubesearchpython import VideosSearch
 from spotipy.oauth2 import SpotifyClientCredentials
 import youtube_dl
 
@@ -134,7 +135,8 @@ def search(request):
         if search_form.is_valid():
             # find youtube video for the keyword provided
             keyword=request.POST['keyword']
-            results = YoutubeSearch(keyword, max_results=3).to_dict()
+            # results = YoutubeSearch(keyword, max_results=3).to_dict()
+            results = VideosSearch(keyword, limit=3).result()['result']
             for i in range(len(results)):
                 video_ids.append(results[i]['id'])
                 video_titles.append(results[i]['title'])
