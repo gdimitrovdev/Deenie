@@ -140,8 +140,8 @@ def search(request):
                 video_ids.append(results[i]['id'])
                 video_titles.append(results[i]['title'])
                 try:
-                    video = pafy.new('https://www.youtube.com'+results[i]['link'])
-                    video_thumbnails.append(video.thumb)
+                    video = pytube.YouTube('https://www.youtube.com'+results[i]['link'])
+                    video_thumbnails.append(video.thumbnail_url)
                     pictureFound.append(True)
                 except:
                     video_thumbnails.append('https://image.flaticon.com/icons/png/512/181/181668.png')
@@ -277,8 +277,8 @@ def more(request,song_url,title):
     search_form = SearchForm()
     url = 'https://www.youtube.com/watch?v=' + str(song_url)
     real_url = pytube.YouTube(url).streams.filter(only_audio=True)[0].url
-    if image=='':
-        image=Youtube(url).thumbnail
+    if image == '':
+        image = pytube.YouTube(url).thumbnail_url
 
     # get all song details together
     details = {'popularity': song_popularity,
