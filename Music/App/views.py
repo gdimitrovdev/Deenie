@@ -2,13 +2,9 @@
 import random
 
 # pip installed imports
-import pafy
 import spotipy
-from youtube_search import YoutubeSearch
 from youtubesearchpython import VideosSearch
 from spotipy.oauth2 import SpotifyClientCredentials
-import youtube_dl
-from tube_dl import Youtube
 import pytube
 
 # Django imports
