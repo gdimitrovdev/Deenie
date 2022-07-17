@@ -28,7 +28,7 @@ def index(request):
 
     # generate random album to recommend to the user
     sp_obj = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-    pl_url = sp_obj.category_playlists()['playlists']['items'][0]['href']
+    pl_url = sp_obj.category_playlists('pop')['playlists']['items'][0]['href']
     number = random.randint(0, 40)
     name=sp_obj.playlist(pl_url)['tracks']['items'][number]['track']['album']['artists'][0]['name']
     album_name = sp_obj.playlist(pl_url)['tracks']['items'][number]['track']['album']['name']
