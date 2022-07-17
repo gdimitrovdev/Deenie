@@ -1,0 +1,15 @@
+Metadata-Version: 2.0
+Name: git-hooks-pylint-django
+Version: 0.1
+Summary: Git hooks for pylint, for django projects
+Home-page: https://github.com/saurabhprakash/git-hooks-pylint-django
+Author: Saurabh
+Author-email: saurabhpresent@gmail.com
+License: UNKNOWN
+Download-URL: https://codeload.github.com/saurabhprakash/git-hooks-pylint-django/zip/master
+Keywords: Django,pylint
+Platform: UNKNOWN
+
+Currently adds pre-commit hook to git codebase, which runs pylint over the given django codebase
+
+

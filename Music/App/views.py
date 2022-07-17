@@ -6,6 +6,7 @@ import spotipy
 from youtubesearchpython import VideosSearch
 from spotipy.oauth2 import SpotifyClientCredentials
 import pytube
+import pafy
 
 # Django imports
 from django.shortcuts import render, redirect
@@ -272,7 +273,10 @@ def more(request,song_url,title):
         song_url=results1[0]['id']
     search_form = SearchForm()
     url = 'https://www.youtube.com/watch?v=' + str(song_url)
-    real_url = pytube.YouTube(url).streams.filter(only_audio=True)[0].url
+    # real_url = pytube.YouTube(url).streams.filter(only_audio=True)[0].url
+    video_pafy = pafy.new(url)
+    best_audio = video_pafy.getbestaudio()
+    real_url = best_audio.url
     if image == '':
         image = pytube.YouTube(url).thumbnail_url
 
@@ -286,11 +290,11 @@ def more(request,song_url,title):
                'isfound': isfound
                }
 
-    context = {'url':song_url,
+    context = {'url': song_url,
                'song_title': real_title,
-               'details':details,
-               'search_form':search_form,
-               'real_url':real_url
+               'details': details,
+               'search_form': search_form,
+               'real_url': real_url,
                }
     return render(request, 'App/more.html', context)
 

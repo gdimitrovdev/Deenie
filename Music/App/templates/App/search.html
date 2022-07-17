@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,7 +73,7 @@
 </head>
 <body>
    <div class="topnav">
-        <a href="../"><img class="logo" src="https://img.techpowerup.org/200416/logoog.png" height="43" width="122"></a>
+        <a href="../"><img class="logo" src="{% static 'App/logo.png' %}" height="43" width="122"></a>
         <form class="form" action="{%url 'search'%}" method="post">
             {%csrf_token%}
             {{search_form}}
