@@ -1,4 +1,3 @@
-import django_heroku
 """
 Django settings for Music project.
 
@@ -12,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -77,10 +77,7 @@ WSGI_APPLICATION = 'Music.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': dj_database_url.parse('postgres://oolbzgcd:uxV5BTxtVIPM-KYmy5qKv6vVc-pHQn5J@lucky.db.elephantsql.com/oolbzgcd')
 }
 
 
@@ -126,5 +123,3 @@ LOGOUT_REDIRECT_URL = ''
 MEDIA_URL='/media/'
 MEDIA_ROOT='media'
 YOUTUBE_DATA_API_KEY='AIzaSyBZlAtSmPp61IkMMi7f7Rf_Ft4qkWrN1D0'
-
-django_heroku.settings(locals())

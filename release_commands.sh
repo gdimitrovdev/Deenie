@@ -1,3 +1,0 @@
-pip install --upgrade pytube
-cd Music
-python manage.py migrate
