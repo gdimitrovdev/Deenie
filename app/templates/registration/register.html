@@ -1,0 +1,92 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            background-color:#4B0082;
+            padding:0px;
+            margin:0px;
+        }
+        .helptext{
+            display:none;
+        }
+        ul{
+            display:none;
+        }
+        .errorlist{
+            display:block;
+            color:white;
+            font-size:22px;
+        }
+        .topnav{
+            overflow:hidden;
+            border:1px solid #000000;
+            background-color:#FFFFFF;
+            border-radius:8px;
+            margin:8px;
+            position:fixed;
+            top:0px;
+            display:block;
+            width:98.7%;
+        }
+        .logo{
+            border-radius:7px;
+            margin:20px;
+        }
+        .page{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            flex-direction:column;
+        }
+        .page a{
+            text-decoration:none;
+            color:white;
+            border:1px solid white;
+            border-radius:5px;
+            padding:8px;
+            font-size:23px;
+        }
+        .btn{
+            background-color:#4B0082;
+            border:1px solid white;
+            border-radius:5px;
+            padding:8px;
+            color:white;
+            font-size:23px;
+        }
+        label[for="id_username"],label[for="id_password1"],label[for="id_password2"]{
+            color:white;
+            font-size:30px;
+        }
+        @media screen and (max-width:600px){
+            .topnav{
+                width:94.3% !important;
+            }
+            .topnav p{
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="topnav">
+        <img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122">
+
+        <p style="float:right; margin-top:35px; margin-right:10px;">The only music site you need!</p>
+    </div>
+    <div class="page">
+        <form action="{%url 'register'%}" method="post" style="margin-left:10px;">
+            {%csrf_token%}
+            {{form.as_p}}
+            <button type="submit" class="btn">Sign up</button>
+        </form>
+    </div>
+</body>
+</html>

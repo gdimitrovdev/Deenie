@@ -1,0 +1,150 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Album</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            background-color:#4B0082;
+        }
+        .topnav{
+            overflow:hidden;
+            border:1px solid #000000;
+            background-color:#FFFFFF;
+            border-radius:8px;
+        }
+        .logo{
+            border-radius:7px;
+            margin:20px;
+        }
+        .form{
+            float:right;
+            margin:30px;
+        }
+        .search{
+            background-image: url('https://s3.us-east-2.amazonaws.com/upload-icon/uploads/icons/png/19850389861579252561-256.png');
+            background-size:20px 20px;
+            background-repeat: no-repeat;
+            border:2px solid #4B0082;
+            border-radius:8px;
+            padding: 4px 10px;
+            text-align:left;
+            padding-left: 23px;
+            width:65px;
+        }
+        .search:focus{
+            outline-width: 0;
+        }
+        p{
+            color:#FFFFFF;
+        }
+        a{
+            text-decoration:none;
+            color:white;
+        }
+        .albumn{
+            font-size:28px;
+        }
+        .row{
+            padding:10px;
+        }
+        .img{
+            border-radius:10px;
+        }
+        .space{
+            padding:10px 35px;
+        }
+        .playlist:hover{
+            text-decoration:underline;
+        }
+        .float{
+            float:left;
+            border:1px solid #FFFFFF;
+            border-radius:12px;
+            margin:15px;
+        }
+        .heading{
+            color:#FFFFFF;
+            text-align:center;
+        }
+        .button {
+          background-color: #8600e6;
+          border: 1px solid #8600e6;
+          color: white;
+          padding: 15px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          border-radius: 6px;
+        }
+        #footer {
+            clear:both;
+        }
+        .namehover:hover{
+            text-decoration:underline;
+        }
+        .button:hover{
+            text-decoration:underline;
+        }
+        .song:hover{
+            text-decoration:underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="topnav">
+        <a href="../../../"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
+        <form class="form" action="{%url 'search'%}" method="post">
+            {%csrf_token%}
+            {{search_form}}
+        </form>
+    </div>
+    <div class="float">
+        <table>
+            <tr>
+                <td class="row"><img class="img" height="200px" width="200px" src="{{picture}}"></td>
+                <td class="row">
+                    <p class="albumn">{{album_name}}</p>
+                    <p class="albumn namehover"><a href="{%url 'artist' name%}">{{name}}</a></p>
+                </td>
+            </tr>
+        </table>
+        <div>
+            <table>
+            {% for id, title in videos%}
+               <tr>
+                    <div class="vid">
+                        <td><a href="{%url 'more' id title%}" class="song"><p style="display:inline; vertical-align: middle;">{{title}}</p></a></td>
+                    </div>
+                   <td class="space"><a href="{%url 'select' id title%}" class="playlist">Add to playlist</a></td>
+               </tr>
+
+            {%endfor%}
+           </table>
+        </div>
+    </div>
+    <div style="float:left">
+        <h1 class="heading">Similar albums:</h1>
+        {%for album, picture, artist in similar%}
+        <div class="float">
+            <table>
+                <tr>
+                    <td class="row"><a href="{%url 'album' album artist%}"><img class="img" height="180px" width="180px" src="{{picture}}"></a></td>
+                    <td class="row">
+                        <p><a href="{%url 'album' album artist%}">{{album}}</a></p>
+                        <p class="namehover"><a href="{%url 'artist' artist%}">{{artist}}</a></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {%endfor%}
+    </div>
+    <div id="footer" style="float:left">
+        <a href="../../../" class="button">Back</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Artist</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            background-color:#4B0082;
+        }
+        .topnav{
+            overflow:hidden;
+            border:1px solid #000000;
+            background-color:#FFFFFF;
+            border-radius:8px;
+        }
+        .logo{
+            border-radius:7px;
+            margin:20px;
+        }
+        .form{
+            float:right;
+            margin:30px;
+        }
+        .search{
+            background-image: url('https://s3.us-east-2.amazonaws.com/upload-icon/uploads/icons/png/19850389861579252561-256.png');
+            background-size:20px 20px;
+            background-repeat: no-repeat;
+            border:2px solid #4B0082;
+            border-radius:8px;
+            padding: 4px 10px;
+            text-align:left;
+            padding-left: 23px;
+            width:65px;
+        }
+        .search:focus{
+            outline-width: 0;
+        }
+        .artist{
+            margin:15px 0px;
+            border:1px solid white;
+            border-radius:8px;
+            display:flex;
+            align-items:center;
+            float:left;
+            padding:5px;
+        }
+        .similar{
+            width:330px;
+            clear:both;
+            float:left;
+        }
+        .similar-artist{
+            margin-right:40px;
+            margin-bottom:30px;
+            float:left;
+            font-size:21px;
+            color:white;
+        }
+        .similar-artist-end{
+            margin-bottom:30px;
+            font-size:21px;
+            color:white;
+            text-align:right;
+        }
+        @media screen and (max-width: 600px) {
+          .artist {
+            flex-direction:column;
+          }
+          .albums{
+            max-width:360px;
+          }
+        }
+        .albums{
+            margin-top:15px;
+            float:left;
+            max-width:900px;
+        }
+        .albums p:hover{
+            text-decoration:underline;
+        }
+        .album{
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            margin-bottom:20px;
+            border:1px solid white;
+            border-radius:10px;
+            padding:8px;
+            float:left;
+            margin-right:20px;
+        }
+        h1,p{
+            color:white;
+        }
+        a{
+            text-decoration:none;
+        }
+        #footer {
+            clear:both;
+        }
+        .button {
+          background-color: #8600e6;
+          border: 1px solid #8600e6;
+          color: white;
+          padding: 15px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          border-radius: 6px;
+        }
+        .similar p:hover{
+            text-decoration:underline;
+        }
+        .button:hover{
+            text-decoration:underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="topnav">
+        <a href="../../"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
+        <form class="form" action="{%url 'search'%}" method="post">
+            {%csrf_token%}
+            {{search_form}}
+        </form>
+    </div>
+    <div style="float:left; margin-right:15px;">
+        <div class="artist">
+            <img height="300px" style="border-radius:6px;" src="{{image}}">
+            <div class="details">
+                <h1>{{name}}</h1>
+                <p>Followers: {{followers}}</p>
+                <p>Popularity: {{popularity}}</p>
+            </div>
+        </div>
+        <div class="similar">
+            <div class='similar-artist'>Similar artists:</div>
+            {%for artist,pic,endofrow in similar%}
+            {%if endofrow%}
+            <a href="{%url 'artist' artist%}">
+                <div class="similar-artist-end">
+                    <table>
+                        <tr>
+                            <td><img height="40px;" src="{{pic}}"></td>
+                            <td><p>{{artist}}</p></td>
+                        </tr>
+                    </table>
+                </div>
+            </a>
+            {%else%}
+            <a href="{%url 'artist' artist%}">
+                <div class='similar-artist'>
+                    <table>
+                        <tr>
+                            <td><img height="40px;" src="{{pic}}"></td>
+                            <td><p>{{artist}}</p></td>
+                        </tr>
+                    </table>
+                </div>
+            </a>
+            {%endif%}
+            {%endfor%}
+        </div>
+    </div>
+    <div class="albums">
+        <h1>Albums:</h1>
+        {%for album, pic in albpic%}
+        <a href="{%url 'album' album name%}">
+            <div class="album">
+                <img height="130px" src="{{pic}}">
+                <br>
+                <p>{{album}}</p>
+            </div>
+        </a>
+        {%endfor%}
+    </div>
+    <div id="footer" style="float:left">
+        <a href="../../" class="button">Back</a>
+    </div>
+</body>
+</html>
