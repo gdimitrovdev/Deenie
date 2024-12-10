@@ -1,7 +1,8 @@
 import random
-
-import spotipy
 import os
+
+from dotenv import load_dotenv
+import spotipy
 from youtubesearchpython import VideosSearch
 from spotipy.oauth2 import SpotifyClientCredentials
 import yt_dlp
@@ -15,6 +16,18 @@ from app.models import Playlist, Song, URIs
 from app.forms import PlaylistForm, SearchForm
 
 
+load_dotenv()
+
+SPOTIPY_CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
+SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
+
+client_credentials_manager = SpotifyClientCredentials(
+    client_id=SPOTIPY_CLIENT_ID, 
+    client_secret=SPOTIPY_CLIENT_SECRET
+)
+spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+
 @login_required
 def index(request):
     # get current user's playlists from database
@@ -25,12 +38,11 @@ def index(request):
     search_form=SearchForm()
 
     # generate random album to recommend to the user
-    sp_obj = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-    pl_url = sp_obj.category_playlists('0JQ5DAqbMKFEC4WFtoNRpw')['playlists']['items'][0]['href']
+    pl_url = spotify.category_playlists('0JQ5DAqbMKFEC4WFtoNRpw')['playlists']['items'][0]['href']
     number = random.randint(0, 40)
-    name=sp_obj.playlist(pl_url)['tracks']['items'][number]['track']['album']['artists'][0]['name']
-    album_name = sp_obj.playlist(pl_url)['tracks']['items'][number]['track']['album']['name']
-    image = sp_obj.playlist(pl_url)['tracks']['items'][number]['track']['album']['images'][2]['url']
+    name=spotify.playlist(pl_url)['tracks']['items'][number]['track']['album']['artists'][0]['name']
+    album_name = spotify.playlist(pl_url)['tracks']['items'][number]['track']['album']['name']
+    image = spotify.playlist(pl_url)['tracks']['items'][number]['track']['album']['images'][2]['url']
 
     # get the user's name
     username=request.user
@@ -41,7 +53,7 @@ def index(request):
     for uri in uris:
         urilist.append(uri.uri)
     if len(urilist)>0:
-        recommended_tracks = sp_obj.recommendations(seed_tracks=['spotify:track:7g7raxdQpiLZT7aOlib4S1'], limit=3)['tracks']
+        recommended_tracks = spotify.recommendations(seed_tracks=['spotify:track:7g7raxdQpiLZT7aOlib4S1'], limit=3)['tracks']
         recommended_tracks_names = []
         recommended_tracks_artists = []
         recommended_tracks_pictures = []
@@ -149,8 +161,7 @@ def search(request):
 
             # search spotify for artists
             try:
-                sp_obj = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-                results = sp_obj.search(q='artist:' + keyword, type='artist')
+                results = spotify.search(q='artist:' + keyword, type='artist')
                 picture=results['artists']['items'][0]['images'][2]['url']
                 name=results['artists']['items'][0]['name']
                 artistFound=True
@@ -161,8 +172,7 @@ def search(request):
 
             # search spotipy for albums
             try:
-                sp_obj = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-                results = sp_obj.search(q=keyword, type='album', limit=1)
+                results = spotify.search(q=keyword, type='album', limit=1)
                 album_name=results['albums']['items'][0]['name']
                 artist_name=results['albums']['items'][0]['artists'][0]['name']
                 album_picture = results['albums']['items'][0]['images'][1]['url']
@@ -214,7 +224,6 @@ def removefrompl(request, playlist_id, song_id):
 def more(request,song_url,title):
     # search spotify for details of the song (danceability, tempo etc.)
     try:
-        sp_obj = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
         ss = title
         ss=ss.split('ft.')
         ss=ss[0]
@@ -226,24 +235,24 @@ def more(request,song_url,title):
             q = ss[0:ss.index('{')]
         else:
             q = ss
-        query = sp_obj.search(q, 1, 0, 'track')
+        query = spotify.search(q, 1, 0, 'track')
         song_uri = query['tracks']['items'][0]['uri']
-        track = sp_obj.track(song_uri)
-        track_data = sp_obj.audio_features(song_uri)
+        track = spotify.track(song_uri)
+        track_data = spotify.audio_features(song_uri)
         song_popularity = track['popularity']
         song_danceability = int(track_data[0]['danceability']*100)
         song_tempo = int(track_data[0]['tempo'])
 
         # find similar artists to the current one
-        artist_uri = sp_obj.track(song_uri)['album']['artists'][0]['uri']
-        artist = sp_obj.artist(artist_uri)['name']
+        artist_uri = spotify.track(song_uri)['album']['artists'][0]['uri']
+        artist = spotify.artist(artist_uri)['name']
         similar_artists = []
         pictures=[]
         endofrow=[]
         image=track['album']['images'][1]['url']
         for i in range(5):
-            similar_artists.append(sp_obj.artist_related_artists(artist_uri)['artists'][i]['name'])
-            pictures.append(sp_obj.artist_related_artists(artist_uri)['artists'][i]['images'][2]['url'])
+            similar_artists.append(spotify.artist_related_artists(artist_uri)['artists'][i]['name'])
+            pictures.append(spotify.artist_related_artists(artist_uri)['artists'][i]['images'][2]['url'])
             if i==1 or i==4:
                 endofrow.append(True)
             else:
@@ -318,9 +327,8 @@ def refresh(request):
 
 def album(request, album_name, artist_name):
     #get all tracks of the album
-    sp_obj = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-    results = sp_obj.search(q=album_name+" "+artist_name, type='album', limit=1)
-    tracks = sp_obj.album_tracks(results['albums']['items'][0]['uri'])['items']
+    results = spotify.search(q=album_name+" "+artist_name, type='album', limit=1)
+    tracks = spotify.album_tracks(results['albums']['items'][0]['uri'])['items']
     names = []
     video_ids=[]
     similar_pictures=[]
@@ -341,15 +349,15 @@ def album(request, album_name, artist_name):
         index = random.randint(0, 4)
         while index in forbidden:
             index = random.randint(0, 4)
-        similar_artists.append(sp_obj.artist_related_artists(artist_uri)['artists'][index]['uri'])
-        similar_names.append(sp_obj.artist_related_artists(artist_uri)['artists'][index]['name'])
+        similar_artists.append(spotify.artist_related_artists(artist_uri)['artists'][index]['uri'])
+        similar_names.append(spotify.artist_related_artists(artist_uri)['artists'][index]['name'])
         forbidden.append(index)
 
     # get random albums from the similar artists and recommend them to the user
     for i in similar_artists:
-        index = random.randint(0, len(sp_obj.artist_albums(i)['items'])-1)
-        albums.append(sp_obj.artist_albums(i)['items'][index]['name'])
-        similar_pictures.append(sp_obj.artist_albums(i)['items'][index]['images'][1]['url'])
+        index = random.randint(0, len(spotify.artist_albums(i)['items'])-1)
+        albums.append(spotify.artist_albums(i)['items'][index]['name'])
+        similar_pictures.append(spotify.artist_albums(i)['items'][index]['images'][1]['url'])
 
     context = {'album_name': album_name,
                'picture': picture,
@@ -365,8 +373,7 @@ def artist(request,name):
     form=SearchForm()
 
     # get the artist
-    sp_obj = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-    results = sp_obj.search(q=name, type='artist', limit=1)
+    results = spotify.search(q=name, type='artist', limit=1)
 
     # find the artist's top 3 genres
     genres_all = results['artists']['items'][0]['genres']
@@ -385,7 +392,7 @@ def artist(request,name):
     # get artist's  albums
     albums_all = []
     pictures_all = []
-    array = sp_obj.artist_albums(uri, album_type='album', limit=50)['items']
+    array = spotify.artist_albums(uri, album_type='album', limit=50)['items']
     for index in range(len(array)):
         albums_all.append(array[index]['name'])
         pictures_all.append(array[index]['images'][0]['url'])
@@ -404,8 +411,8 @@ def artist(request,name):
     artist_pictures=[]
     endofrow=[]
     for i in range(5):
-        similar_artists.append(sp_obj.artist_related_artists(uri)['artists'][i]['name'])
-        artist_pictures.append(sp_obj.artist_related_artists(uri)['artists'][i]['images'][2]['url'])
+        similar_artists.append(spotify.artist_related_artists(uri)['artists'][i]['name'])
+        artist_pictures.append(spotify.artist_related_artists(uri)['artists'][i]['images'][2]['url'])
         if i == 0 or i==2 or i == 4:
             endofrow.append(True)
         else:
