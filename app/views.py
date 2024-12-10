@@ -1,21 +1,19 @@
-# stdlib imports
 import random
 
-# pip installed imports
 import spotipy
+import os
 from youtubesearchpython import VideosSearch
 from spotipy.oauth2 import SpotifyClientCredentials
-import pytube
-import pafy
-
-# Django imports
+import yt_dlp
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
-from .models import Playlist, Song, URIs
-from .forms import PlaylistForm, SearchForm
 from django.views.decorators.csrf import csrf_exempt
+
+from app.models import Playlist, Song, URIs
+from app.forms import PlaylistForm, SearchForm
+
 
 @login_required
 def index(request):
@@ -71,6 +69,7 @@ def index(request):
              }
     return render(request, 'app/index.html', context)
 
+
 def register(request):
     # get the registration form
     form=UserCreationForm()
@@ -89,6 +88,7 @@ def register(request):
     context={'form':form}
     return render(request, 'registration/register.html', context)
 
+
 def add(request):
     # get the form for creating new playlist
     form=PlaylistForm()
@@ -102,12 +102,14 @@ def add(request):
 
     return redirect('../')
 
+
 def delete(request, playlist_id):
     # delete playlist by id
     playlist=request.user.playlists.get(pk=playlist_id)
     playlist.delete()
 
     return redirect('../../')
+
 
 def playlist(request, playlist_id):
     # get the search form
@@ -120,25 +122,25 @@ def playlist(request, playlist_id):
     context={'songs':songs, 'playlist':playlist, 'search_form':search_form}
     return render(request, 'app/playlist.html',context)
 
+
 def search(request):
     # search youtube and spotify
-    video_ids=[]
-    video_titles=[]
-    video_thumbnails=[]
-    pictureFound=[]
-    if request.method=="POST":
-        search_form=SearchForm(request.POST)
+    video_ids = []
+    video_titles = []
+    video_thumbnails = []
+    pictureFound = []
+
+    if request.method == 'POST':
+        search_form = SearchForm(request.POST)
         if search_form.is_valid():
             # find youtube video for the keyword provided
-            keyword=request.POST['keyword']
-            # results = YoutubeSearch(keyword, max_results=3).to_dict()
+            keyword = request.POST['keyword']
             results = VideosSearch(keyword, limit=3).result()['result']
             for i in range(len(results)):
                 video_ids.append(results[i]['id'])
                 video_titles.append(results[i]['title'])
                 try:
-                    video = pytube.YouTube('https://www.youtube.com'+results[i]['link'])
-                    video_thumbnails.append(video.thumbnail_url)
+                    video_thumbnails.append(results['result'][0]['thumbnails'][0]['url'])
                     pictureFound.append(True)
                 except:
                     video_thumbnails.append('https://image.flaticon.com/icons/png/512/181/181668.png')
@@ -182,12 +184,14 @@ def search(request):
              'artist_name':artist_name}
     return render(request, 'app/search.html', context)
 
+
 def select(request, id, title):
     # select playlist to add current song to
     playlists=request.user.playlists.all()
     form=SearchForm()
     context={'playlists':playlists, 'id':id, 'title':title, 'search_form':form}
     return render(request, 'app/select.html', context)
+
 
 def addtopl(request, playlist_id, id, title):
     # add song to selected playlist
@@ -196,12 +200,14 @@ def addtopl(request, playlist_id, id, title):
     song.save()
     return redirect('../../../../')
 
+
 def removefrompl(request, playlist_id, song_id):
     # remove song from playlist
     playlistSelected=request.user.playlists.get(pk=playlist_id)
     songToDel=playlistSelected.songs.get(pk=song_id)
     songToDel.delete()
     return redirect('../../../playlist/'+str(playlist_id))
+
 
 # render a page for the selected song
 @csrf_exempt
@@ -268,17 +274,22 @@ def more(request,song_url,title):
     find the url for every single song and this slows the site down. Instead we go to the more page and find the youtube
     url here.
     '''
-    if song_url=='1':
+    if song_url == '1':
         results1 = VideosSearch(title, limit=3).result()['result']
-        song_url=results1[0]['id']
+        song_url = results1[0]['id']
     search_form = SearchForm()
     url = 'https://www.youtube.com/watch?v=' + str(song_url)
-    # real_url = pytube.YouTube(url).streams.filter(only_audio=True)[0].url
-    video_pafy = pafy.new(url)
-    best_audio = video_pafy.getbestaudio()
-    real_url = best_audio.url
+    
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'noplaylist': True,
+    }
+    ydl = yt_dlp.YoutubeDL(ydl_opts)
+    info = ydl.extract_info(song_url, download=False)
+    audio_url = info['url']
+
     if image == '':
-        image = pytube.YouTube(url).thumbnail_url
+        image = results1[0]['thumbnails'][0]['url']
 
     # get all song details together
     details = {'popularity': song_popularity,
@@ -294,14 +305,16 @@ def more(request,song_url,title):
                'song_title': real_title,
                'details': details,
                'search_form': search_form,
-               'real_url': real_url,
+               'real_url': audio_url,
                }
     return render(request, 'app/more.html', context)
+
 
 # a function that allows us to refresh the current page
 # it is used to find new random album for the user
 def refresh(request):
     return redirect('../')
+
 
 def album(request, album_name, artist_name):
     #get all tracks of the album
@@ -346,6 +359,7 @@ def album(request, album_name, artist_name):
                'similar':zip(albums,similar_pictures,similar_names)
                }
     return render(request, 'app/album.html', context)
+
 
 def artist(request,name):
     form=SearchForm()

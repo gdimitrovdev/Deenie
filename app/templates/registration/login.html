@@ -80,7 +80,7 @@
             {%csrf_token%}
             {{form.as_p}}
             <button type="submit" class="btn">Login</button>
-            <a href="../../register">Sign up</a>
+            <a href="{%url 'register'%}">Sign up</a>
         </form>
     </div>
 </body>
