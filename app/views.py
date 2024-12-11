@@ -31,18 +31,22 @@ spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 @login_required
 def index(request):
     # get current user's playlists from database
-    playlists=request.user.playlists.all()
+    playlists = request.user.playlists.all()
     # form for creating playlists
-    form=PlaylistForm()
+    form = PlaylistForm()
     # form for searching
-    search_form=SearchForm()
+    search_form = SearchForm()
 
     # generate random album to recommend to the user
-    pl_url = spotify.category_playlists('0JQ5DAqbMKFEC4WFtoNRpw')['playlists']['items'][0]['href']
-    number = random.randint(0, 40)
-    name=spotify.playlist(pl_url)['tracks']['items'][number]['track']['album']['artists'][0]['name']
-    album_name = spotify.playlist(pl_url)['tracks']['items'][number]['track']['album']['name']
-    image = spotify.playlist(pl_url)['tracks']['items'][number]['track']['album']['images'][2]['url']
+    new_album_releases = spotify.new_releases(limit=50)['albums']['items']
+    random_album = random.choice(new_album_releases)
+
+    album_info = {
+        'name': random_album['name'],
+        'artist': ', '.join(artist['name'] for artist in random_album['artists']),
+        'thumbnail': random_album['images'][0]['url'],
+        'spotify_url': random_album['external_urls']['spotify']
+    }
 
     # get the user's name
     username=request.user
@@ -72,8 +76,7 @@ def index(request):
     context={'playlists':playlists,
              'form':form,
              'search_form':search_form,
-             'name':name, 'image':image,
-             'album_name':album_name,
+             'album_info': album_info,
              'username':username,
              'uris':uris,
              'zip':recommended_zip,
