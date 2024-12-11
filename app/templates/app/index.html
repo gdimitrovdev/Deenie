@@ -185,7 +185,10 @@
     <div class="pldiv3">
         <h1>Your account</h1>
         <p style="color:white; font-size:20px;">{{username}}</p>
-        <a class="lgout" href="accounts/logout?next=/">Logout</a>
+        <form method="post" action="{% url 'logout' %}?next=/" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn lgout">Logout</button>
+        </form>
     </div>
     <div class="container">
         {%if isFound%}
