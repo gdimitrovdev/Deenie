@@ -49,39 +49,39 @@ def index(request):
     }
 
     # get the user's name
-    username=request.user
+    username = request.user
 
-    # find recommended songs for the user
-    uris=request.user.uris.all()
-    urilist=[]
-    for uri in uris:
-        urilist.append(uri.uri)
-    if len(urilist)>0:
-        recommended_tracks = spotify.recommendations(seed_tracks=['spotify:track:7g7raxdQpiLZT7aOlib4S1'], limit=3)['tracks']
-        recommended_tracks_names = []
-        recommended_tracks_artists = []
-        recommended_tracks_pictures = []
-        recommended_tracks_albums = []
-        for i in range(3):
-            recommended_tracks_names.append(recommended_tracks[i]['name'])
-            recommended_tracks_artists.append(recommended_tracks[i]['artists'][0]['name'])
-            recommended_tracks_pictures.append(recommended_tracks[i]['album']['images'][0]['url'])
-            recommended_tracks_albums.append(recommended_tracks[i]['album']['name'])
-        recommended_zip = zip(recommended_tracks_names, recommended_tracks_artists, recommended_tracks_pictures, recommended_tracks_albums)
-        isFound=True
-    else:
-        recommended_zip=[]
-        isFound=False
+    # # find recommended songs for the user
+    # uris = request.user.uris.all()
+    # uris = [uri.uri for uri in uris]
 
-    context={'playlists':playlists,
-             'form':form,
-             'search_form':search_form,
-             'album_info': album_info,
-             'username':username,
-             'uris':uris,
-             'zip':recommended_zip,
-             'isFound':isFound
-             }
+    # if len(uris) > 0:
+    #     recommended_tracks = spotify.recommendations(seed_tracks=uris, limit=3)['tracks']
+    #     recommended_tracks_names = []
+    #     recommended_tracks_artists = []
+    #     recommended_tracks_pictures = []
+    #     recommended_tracks_albums = []
+    #     for i in range(3):
+    #         recommended_tracks_names.append(recommended_tracks[i]['name'])
+    #         recommended_tracks_artists.append(recommended_tracks[i]['artists'][0]['name'])
+    #         recommended_tracks_pictures.append(recommended_tracks[i]['album']['images'][0]['url'])
+    #         recommended_tracks_albums.append(recommended_tracks[i]['album']['name'])
+    #     recommended_zip = zip(recommended_tracks_names, recommended_tracks_artists, recommended_tracks_pictures, recommended_tracks_albums)
+    #     is_found = True
+    # else:
+    #     recommended_zip = []
+    #     is_found = False
+
+    context = {
+        'playlists': playlists,
+        'form': form,
+        'search_form': search_form,
+        'album_info': album_info,
+        'username': username,
+        # 'uris': uris,
+        # 'zip': recommended_zip,
+        # 'is_found': is_found,
+    }
     return render(request, 'app/index.html', context)
 
 
