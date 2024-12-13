@@ -43,9 +43,10 @@ def index(request):
 
     album_info = {
         'name': random_album['name'],
+        'id': random_album['id'],
         'artist': ', '.join(artist['name'] for artist in random_album['artists']),
-        'thumbnail': random_album['images'][0]['url'],
-        'spotify_url': random_album['external_urls']['spotify']
+        'artist_id': random_album['artists'][0]['id'],
+        'cover': random_album['images'][0]['url'],
     }
 
     # get the user's name
@@ -372,64 +373,44 @@ def album(request, album_name, artist_name):
     return render(request, 'app/album.html', context)
 
 
-def artist(request,name):
-    form=SearchForm()
+def artist(request, id):
+    search_form = SearchForm()
 
     # get the artist
-    results = spotify.search(q=name, type='artist', limit=1)
-
-    # find the artist's top 3 genres
-    genres_all = results['artists']['items'][0]['genres']
-    genres = []
-    if len(genres_all) >= 3:
-        genres = genres_all[:3]
-    else:
-        genres = genres_all
+    artist_result = spotify.artist(id)
 
     # get details about the artist
-    popularity = results['artists']['items'][0]['popularity']
-    image = results['artists']['items'][0]['images'][0]['url']
-    followers = results['artists']['items'][0]['followers']['total']
-    uri = results['artists']['items'][0]['uri']
+    artist_info = {
+        'name': artist_result['name'],
+        'popularity': artist_result['popularity'],
+        'image': artist_result['images'][0]['url'],
+        'followers': artist_result['followers']['total'],
+        'genres': artist_result['genres'][:3],
+    }
 
     # get artist's  albums
-    albums_all = []
-    pictures_all = []
-    array = spotify.artist_albums(uri, album_type='album', limit=50)['items']
-    for index in range(len(array)):
-        albums_all.append(array[index]['name'])
-        pictures_all.append(array[index]['images'][0]['url'])
-    passedAlbums = []
-    leng = len(albums_all)
-    albums = []
-    pictures = []
-    for i in range(leng):
-        if albums_all[i] not in passedAlbums:
-            albums.append(albums_all[i])
-            pictures.append(pictures_all[i])
-        passedAlbums.append(albums_all[i])
+    albums_result = spotify.artist_albums(id, limit=50)['items']
+    albums = [
+        {
+            'name': album['name'],
+            'cover': album['images'][0]['url']
+        } for album in albums_result
+    ]
 
-    # get similar artists
-    similar_artists=[]
-    artist_pictures=[]
-    endofrow=[]
-    for i in range(5):
-        similar_artists.append(spotify.artist_related_artists(uri)['artists'][i]['name'])
-        artist_pictures.append(spotify.artist_related_artists(uri)['artists'][i]['images'][2]['url'])
-        if i == 0 or i==2 or i == 4:
-            endofrow.append(True)
-        else:
-            endofrow.append(False)
-    similar=zip(similar_artists,artist_pictures,endofrow)
-    albpic=zip(albums,pictures)
+    # # get similar artists
+    # similar_artists_result = spotify.artist_related_artists(id)['artists'][:3]
+    # similar_artists = [
+    #     {
+    #         'id': artist['id'],
+    #         'name': artist['name'],
+    #         'image': artist['images'][0]['url']
+    #     } for artist in similar_artists_result
+    # ]
 
-    context={'name':name,
-             'search_form':form,
-             'genres':genres,
-             'popularity':popularity,
-             'image':image,
-             'followers':followers,
-             'albpic':albpic,
-             'similar':similar
-             }
-    return render(request,'app/artist.html' ,context)
+    context = {
+        'search_form': search_form,
+        'artist_info': artist_info,
+        'albums': albums,
+        # 'similar_artists': similar_artists,
+    }
+    return render(request, 'app/artist.html', context)
