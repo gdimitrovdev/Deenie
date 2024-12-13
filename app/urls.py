@@ -16,5 +16,5 @@ urlpatterns = [
     path('more/<song_url>/<path:title>', views.more, name='more'),
     path('refresh/', views.refresh, name='refresh'),
     path('album/<path:album_name>/<path:artist_name>',views.album,name='album'),
-    path('artist/<path:name>', views.artist, name='artist'),
+    path('artist/<path:id>', views.artist, name='artist'),
 ]
