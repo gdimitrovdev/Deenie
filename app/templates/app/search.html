@@ -73,62 +73,64 @@
 </head>
 <body>
    <div class="topnav">
-        <a href="../"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
-        <form class="form" action="{%url 'search'%}" method="post">
-            {%csrf_token%}
-            {{search_form}}
+        <a href="{% url 'index' %}"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
+        <form class="form" action="{% url 'search' %}" method="post">
+            {% csrf_token %}
+            {{ search_form }}
         </form>
    </div>
 
    <div class="results">
-       <h1>Songs:</h1>
-       <table>
-        {% for id, title, thumbnail, bool in videos%}
-           {%if bool%}
-           <tr>
-                <div class="vid">
-                    <td><a href="{%url 'more' id title%}"><img src="{{thumbnail}}" height='170px;'></a></td>
-                    <td><a href="{%url 'more' id title%}"><p style="display:inline; vertical-align: middle;">{{title}}</p></a></td>
-                </div>
-               <td><a href="{%url 'select' id title%}">Add to playlist</a></td>
-           </tr>
-           {%else%}
-           <tr>
-                <div class="vid">
-                    <td><a href="{%url 'more' id title%}"><img height="100" width="100" src="{{thumbnail}}"></a></td>
-                    <td><a href="{%url 'more' id title%}"><p style="display:inline; vertical-align: middle;">{{title}}</p></a></td>
-                </div>
-               <td><a href="{%url 'select' id title%}">Add to playlist</a></td>
-           </tr>
-           {%endif%}
-        {%endfor%}
-       </table>
+
+        <h1>Songs:</h1>
+        {% if songs %}
+            <table>
+                {% for song in songs %}
+                    <tr>
+                            <div class="vid">
+                                <td><a href="{% url 'more' song.id song.name %}"><img src="{{ song.cover }}" height='170px;'></a></td>
+                                <td><a href="{% url 'more' song.id song.name %}"><p style="display:inline; vertical-align: middle;">{{ song.name }}</p></a></td>
+                            </div>
+                        <td><a href="{% url 'select' song.id song.name %}">Add to playlist</a></td>
+                    </tr>
+                {%endfor%}
+            </table>
+        {% else %}
+            <p>No songs with this name found</p>
+        {% endif %}
+
         <br>
-       <h1>Artists:</h1>
-       {%if found%}
-       <table>
-           <tr>
-               <td><img height="120" width="120" src="{{picture}}"></td>
-               <td><a href="{%url 'artist' name%}">{{name}}</a></td>
-           </tr>
-       </table>
-       {%else%}
-       <p>No artists with this name found</p>
-       {%endif%}
-       <h1>Albums:</h1>
-       {%if albumFound%}
-       <table>
-           <tr>
-               <td><a href="{%url 'album' album_name artist_name%}"><img height="120" width="120" src="{{cover}}"></a></td>
-               <td><a href="{%url 'album' album_name artist_name%}"><p>{{album_name}}</p></a></td>
-           </tr>
-       </table>
-       {%else%}
-       <p>No albums with this name found</p>
-       {%endif%}
+        
+        <h1>Artists:</h1>
+        {% if artists %}
+            <table>
+                {% for artist in artists %}
+                    <tr>
+                        <td><img height="120" width="120" src="{{ artist.picture }}"></td>
+                        <td><a href="{% url 'artist' artist.id %}">{{ artist.name }}</a></td>
+                    </tr>
+                {%endfor%}
+            </table>
+        {% else %}
+            <p>No artists with this name found</p>
+        {% endif %}
+
+        <h1>Albums:</h1>
+        {% if albums %}
+            <table>
+                {% for album in albums %}
+                    <tr>
+                        <td><a href="{% url 'album' album.id %}"><img height="120" width="120" src="{{ album.cover }}"></a></td>
+                        <td><a href="{% url 'album' album.id %}"><p>{{ album.name }}</p></a></td>
+                    </tr>
+                {%endfor%}
+            </table>
+        {% else %}
+            <p>No albums with this name found</p>
+        {% endif %}
     </div>
 
 
-   <a href="../" class="button">Back</a>
+   <a href="{% url 'index' %}" class="button">Back</a>
 </body>
 </html>
