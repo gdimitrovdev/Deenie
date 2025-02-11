@@ -97,30 +97,30 @@
 </head>
 <body>
     <div class="topnav">
-        <a href="../../../"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
-        <form class="form" action="{%url 'search'%}" method="post">
-            {%csrf_token%}
-            {{search_form}}
+        <a href="{% url 'index' %}"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
+        <form class="form" action="{% url 'search' %}" method="post">
+            {% csrf_token %}
+            {{ search_form }}
         </form>
     </div>
     <div class="float">
         <table>
             <tr>
-                <td class="row"><img class="img" height="200px" width="200px" src="{{picture}}"></td>
+                <td class="row"><img class="img" height="200px" width="200px" src="{{ album.cover }}"></td>
                 <td class="row">
-                    <p class="albumn">{{album_name}}</p>
-                    <p class="albumn namehover"><a href="{%url 'artist' name%}">{{name}}</a></p>
+                    <p class="albumn">{{ album.name }}</p>
+                    <p class="albumn namehover"><a href="{% url 'artist' album.artist_id %}">{{ album.artist }}</a></p>
                 </td>
             </tr>
         </table>
         <div>
             <table>
-            {% for id, title in videos%}
+            {% for track in tracks %}
                <tr>
                     <div class="vid">
-                        <td><a href="{%url 'more' id title%}" class="song"><p style="display:inline; vertical-align: middle;">{{title}}</p></a></td>
+                        <td><a href="{% url 'more' track.id track.name %}" class="song"><p style="display:inline; vertical-align: middle;">{{ track.name }}</p></a></td>
                     </div>
-                   <td class="space"><a href="{%url 'select' id title%}" class="playlist">Add to playlist</a></td>
+                   <td class="space"><a href="{% url 'select' track.id track.name %}" class="playlist">Add to playlist</a></td>
                </tr>
 
             {%endfor%}
@@ -144,7 +144,7 @@
         {%endfor%}
     </div>
     <div id="footer" style="float:left">
-        <a href="../../../" class="button">Back</a>
+        <a href="{% url 'index' %}" class="button">Back</a>
     </div>
 </body>
 </html>

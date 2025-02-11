@@ -101,7 +101,9 @@ def register(request):
             login(request, user)
             return redirect('../')
 
-    context={'form':form}
+    context = {
+        'form': form
+    }
     return render(request, 'registration/register.html', context)
 
 
@@ -329,47 +331,55 @@ def refresh(request):
     return redirect('../')
 
 
-def album(request, album_name, artist_name):
-    #get all tracks of the album
-    results = spotify.search(q=album_name+" "+artist_name, type='album', limit=1)
-    tracks = spotify.album_tracks(results['albums']['items'][0]['uri'])['items']
-    names = []
-    video_ids=[]
-    similar_pictures=[]
-    picture = results['albums']['items'][0]['images'][1]['url']
-    for i in range(len(tracks)):
-        names.append(tracks[i]['name'])
-        video_ids.append('1')
-    videos=zip(video_ids, names)
-    search_form=SearchForm()
+def album(request, id):
+    album_result = spotify.album(id)
+
+    album_info = {
+        'name': album_result['name'],
+        'cover': album_result['images'][0]['url'],
+        'artist': ', '.join(artist['name'] for artist in album_result['artists']),
+        'artist_id': album_result['artists'][0]['id'],
+    }
+
+    tracks_result = spotify.album_tracks(id)['items']
+    tracks = []
+
+    for i in range(len(tracks_result)):
+        track = {
+            'name': tracks_result[i]['name'],
+            'id': tracks_result[i]['id'],
+        }
+
+        tracks.append(track)
 
     # find similar artists to the album artist
-    artist_uri = results['albums']['items'][0]['artists'][0]['uri']
-    similar_artists = []
-    similar_names=[]
-    forbidden = []
-    albums = []
-    for i in range(3):
-        index = random.randint(0, 4)
-        while index in forbidden:
-            index = random.randint(0, 4)
-        similar_artists.append(spotify.artist_related_artists(artist_uri)['artists'][index]['uri'])
-        similar_names.append(spotify.artist_related_artists(artist_uri)['artists'][index]['name'])
-        forbidden.append(index)
+    # artist_uri = results['albums']['items'][0]['artists'][0]['uri']
+    # similar_artists = []
+    # similar_names=[]
+    # forbidden = []
+    # albums = []
+    # for i in range(3):
+    #     index = random.randint(0, 4)
+    #     while index in forbidden:
+    #         index = random.randint(0, 4)
+    #     similar_artists.append(spotify.artist_related_artists(artist_uri)['artists'][index]['uri'])
+    #     similar_names.append(spotify.artist_related_artists(artist_uri)['artists'][index]['name'])
+    #     forbidden.append(index)
 
     # get random albums from the similar artists and recommend them to the user
-    for i in similar_artists:
-        index = random.randint(0, len(spotify.artist_albums(i)['items'])-1)
-        albums.append(spotify.artist_albums(i)['items'][index]['name'])
-        similar_pictures.append(spotify.artist_albums(i)['items'][index]['images'][1]['url'])
+    # for i in similar_artists:
+    #     index = random.randint(0, len(spotify.artist_albums(i)['items'])-1)
+    #     albums.append(spotify.artist_albums(i)['items'][index]['name'])
+    #     similar_pictures.append(spotify.artist_albums(i)['items'][index]['images'][1]['url'])
 
-    context = {'album_name': album_name,
-               'picture': picture,
-               'videos': videos,
-               'name': artist_name,
-               'search_form': search_form,
-               'similar':zip(albums,similar_pictures,similar_names)
-               }
+    search_form = SearchForm()
+
+    context = {
+        'album': album_info,
+        'tracks': tracks,
+        'search_form': search_form,
+        # 'similar':zip(albums,similar_pictures,similar_names)
+    }
     return render(request, 'app/album.html', context)
 
 
@@ -393,7 +403,8 @@ def artist(request, id):
     albums = [
         {
             'name': album['name'],
-            'cover': album['images'][0]['url']
+            'cover': album['images'][0]['url'],
+            'id': album['id'],
         } for album in albums_result
     ]
 
