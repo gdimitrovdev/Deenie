@@ -170,7 +170,7 @@
     <div class="albums">
         <h1>Albums:</h1>
         {% for album in albums %}
-            <a href="{% url 'album' album.name artist_info.name %}">
+            <a href="{% url 'album' album.id %}">
                 <div class="album">
                     <img height="130px" src="{{ album.cover }}">
                     <br>

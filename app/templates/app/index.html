@@ -174,9 +174,9 @@
     <div class="pldiv2">
         <h1>Artist and album you should check out:</h1>
         <a href="{% url 'artist' album_info.artist_id %}" style="color:#FFFFFF; text-decoration:none;"><p class="hoverlink">{{ album_info.artist }}</p></a>
-        <a href="{% url 'album' album_info.name album_info.artist %}"><p style="color:#FFFFFF" class="hoverlink">Album: {{ album_info.name }}</p></a>
-        <a href="{% url 'album' album_info.name album_info.artist %}">
-        <img src="{{ album_info.cover }}">
+        <a href="{% url 'album' album_info.id %}"><p style="color:#FFFFFF" class="hoverlink">Album: {{ album_info.name }}</p></a>
+        <a href="{% url 'album' album_info.id %}">
+            <img src="{{ album_info.cover }}">
         </a>
         <br>
         <br>
