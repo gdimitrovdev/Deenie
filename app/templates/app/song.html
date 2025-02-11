@@ -1,0 +1,196 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>More</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            background-color:#4B0082;
+        }
+        .topnav{
+            overflow:hidden;
+            border:1px solid #000000;
+            background-color:#FFFFFF;
+            border-radius:8px;
+        }
+        .logo{
+            border-radius:7px;
+            margin:20px;
+        }
+        .form{
+            float:right;
+            margin:30px;
+        }
+        .search{
+            background-image: url('https://s3.us-east-2.amazonaws.com/upload-icon/uploads/icons/png/19850389861579252561-256.png');
+            background-size:20px 20px;
+            background-repeat: no-repeat;
+            border:2px solid #4B0082;
+            border-radius:8px;
+            padding: 4px 10px;
+            text-align:left;
+            padding-left: 23px;
+            width:65px;
+        }
+        .search:focus{
+            outline-width: 0;
+        }
+        .main{
+            background-color:#8600e6;
+            border-radius:8px;
+            display:inline-block;
+            padding:7px 7px;
+            margin:13px;
+            float:left;
+        }
+        .td{
+            padding:5px;
+            padding-bottom:1px;
+        }
+        .player{
+            text-align:center;
+            padding:0px;
+        }
+        a{
+            text-decoration:none;
+            color:#FFFFFF;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .Drake{
+            color:#FFFFFF;
+            font-size:23px;
+        }
+        h1{
+            color:#FFFFFF;
+            font-size:38px;
+        }
+        .button {
+          background-color: #8600e6;
+          border: 1px solid #8600e6;
+          color: white;
+          padding: 15px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          border-radius: 6px;
+          margin:13px;
+        }
+        .similar{
+            padding:8px;
+            float:left;
+            border:1px solid #4B0082;
+        }
+        .end{
+            padding:8px;
+            border:1px solid #4B0082;
+        }
+        .size{
+            font-size:30px;
+            color:#FFFFFF;
+        }
+        .info{
+            color:white;
+            font-size:22px;
+        }
+        .similar p:hover{
+            text-decoration:underline;
+        }
+        .end p:hover{
+            text-decoration:underline;
+        }
+        .button:hover{
+            text-decoration:underline;
+        }
+        .player a:hover{
+            text-decoration:underline;
+        }
+        .td a:hover{
+            text-decoration:underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="topnav">
+        <a href="../../../"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
+        <form class="form" action="{%url 'search'%}" method="post">
+            {%csrf_token%}
+            {{search_form}}
+        </form>
+    </div>
+    <div class="main">
+        <table>
+            <tr>
+                <td class="td">
+                    <img height="140" width="140" src="{{details.image}}">
+                </td>
+                <td class="td">
+                    <h1>{{song_title}}</h1>
+                    {%if details.isfound%}
+                        <a href="{%url 'artist' details.artist%}"><p class="Drake">{{details.artist}}</p></a>
+                    {%else%}
+                        <p class="Drake">{{details.artist}}</p>
+                    {%endif%}
+                </td>
+            </tr>
+            <tr>
+                <td class="player" colspan="2">
+                    <video controls autoplay name="media">
+                        <source src='{{ real_url }}' type='audio/mp4'>
+                    </video>
+                </td>
+            </tr>
+        </table>
+    </div>
+    {%if details.isfound%}
+    <div class="similar">
+        <p class="size" id="size"><u>Similar artists:</u></p>
+    </div>
+
+
+    {%for artist_name, picture, endofrow in details.artists%}
+    {%if endofrow%}
+    <div class="end">
+        <table>
+            <tr>
+                <td><a href="{%url 'artist' artist_name%}"><img height="34" width="34" src="{{picture}}"></a></td>
+                <td><a href="{%url 'artist' artist_name%}"><p class="size">{{artist_name}}</p></a></td>
+            </tr>
+        </table>
+    </div>
+    {%else%}
+    <div class="similar">
+        <table>
+            <tr>
+                <td><a href="{%url 'artist' artist_name%}"><img height="34" width="34" src="{{picture}}"></a></td>
+                <td><a href="{%url 'artist' artist_name%}"><p class="size">{{artist_name}}</p></a></td>
+            </tr>
+        </table>
+    </div>
+    {%endif%}
+
+    {%endfor%}
+
+    {%endif%}
+    {%if details.isfound%}
+    <div>
+        <br>
+        <p class="info">Popularity: {{details.popularity}}/100</p>
+        <p class="info">Danceability: {{details.danceability}}/100</p>
+        <p class="info">Tempo: {{details.tempo}}bpm</p>
+        <a href="../../../" class="button">Back</a>
+    </div>
+    {%else%}
+    <div>
+        <br>
+        <p class="info">Popularity: N/A</p>
+        <p class="info">Danceability: N/A</p>
+        <p class="info">Tempo: N/A</p>
+        <a href="../../../" class="button">Back</a>
+    </div>
+    {%endif%}
+</body>
+</html>

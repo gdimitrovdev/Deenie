@@ -142,62 +142,57 @@ def playlist(request, playlist_id):
 
 
 def search(request):
-    # search youtube and spotify
-    video_ids = []
-    video_titles = []
-    video_thumbnails = []
-    pictureFound = []
+    song_results = []
+    album_results = []
+    artist_results = []
 
     if request.method == 'POST':
         search_form = SearchForm(request.POST)
         if search_form.is_valid():
-            # find youtube video for the keyword provided
             keyword = request.POST['keyword']
-            results = VideosSearch(keyword, limit=3).result()['result']
-            for i in range(len(results)):
-                video_ids.append(results[i]['id'])
-                video_titles.append(results[i]['title'])
-                try:
-                    video_thumbnails.append(results['result'][0]['thumbnails'][0]['url'])
-                    pictureFound.append(True)
-                except:
-                    video_thumbnails.append('https://image.flaticon.com/icons/png/512/181/181668.png')
-                    pictureFound.append(False)
-            videos=zip(video_ids,video_titles,video_thumbnails, pictureFound)
+            song_search_results = spotify.search(q=keyword, type='track', limit=5)
+            album_search_results = spotify.search(q=keyword, type='album', limit=5)
+            artist_search_results = spotify.search(q=keyword, type='artist', limit=5)
 
-            # search spotify for artists
-            try:
-                results = spotify.search(q='artist:' + keyword, type='artist')
-                picture=results['artists']['items'][0]['images'][2]['url']
-                name=results['artists']['items'][0]['name']
-                artistFound=True
-            except:
-                picture=0
-                name=0
-                artistFound=False
+            if 'tracks' in song_search_results:
+                for song in song_search_results['tracks']['items']:
+                    song_result = {
+                        'id': song['id'],
+                        'name': song['name'],
+                        'cover': song['album']['images'][0]['url'],
+                    }
 
-            # search spotipy for albums
-            try:
-                results = spotify.search(q=keyword, type='album', limit=1)
-                album_name=results['albums']['items'][0]['name']
-                artist_name=results['albums']['items'][0]['artists'][0]['name']
-                album_picture = results['albums']['items'][0]['images'][1]['url']
-                albumFound=True
-            except:
-                artist_name = ''
-                album_name=''
-                album_picture=''
-                albumFound=False
+                    song_results.append(song_result)
 
-    context={'videos':videos,
-             'search_form':search_form,
-             'found':artistFound,
-             'picture':picture,
-             'name':name,
-             'cover':album_picture,
-             'album_name':album_name,
-             'albumFound':albumFound,
-             'artist_name':artist_name}
+            if 'albums' in album_search_results:
+                for album in album_search_results['albums']['items']:
+                    album_result = {
+                        'id': album['id'],
+                        'name': album['name'],
+                        'cover': album['images'][0]['url'],
+                    }
+
+                    album_results.append(album_result)
+
+            if 'artists' in artist_search_results:
+                for artist in artist_search_results['artists']['items']:
+                    artist_result = {
+                        'id': artist['id'],
+                        'name': artist['name'],
+                        'picture': album['images'][0]['url'],
+                    }
+
+                    artist_results.append(artist_result)
+        
+    else:
+        return redirect('/')
+
+    context = {
+        'songs': song_results,
+        'albums': album_results,
+        'artists': artist_results,
+        'search_form': search_form,
+    }
     return render(request, 'app/search.html', context)
 
 
@@ -328,7 +323,7 @@ def more(request,song_url,title):
 # a function that allows us to refresh the current page
 # it is used to find new random album for the user
 def refresh(request):
-    return redirect('../')
+    return redirect('/')
 
 
 def album(request, id):
@@ -341,13 +336,13 @@ def album(request, id):
         'artist_id': album_result['artists'][0]['id'],
     }
 
-    tracks_result = spotify.album_tracks(id)['items']
+    track_results = spotify.album_tracks(id)['items']
     tracks = []
 
-    for i in range(len(tracks_result)):
+    for track_result in track_results:
         track = {
-            'name': tracks_result[i]['name'],
-            'id': tracks_result[i]['id'],
+            'name': track_result['name'],
+            'id': track_result['id'],
         }
 
         tracks.append(track)
@@ -399,13 +394,13 @@ def artist(request, id):
     }
 
     # get artist's  albums
-    albums_result = spotify.artist_albums(id, limit=50)['items']
+    album_results = spotify.artist_albums(id, limit=50)['items']
     albums = [
         {
             'name': album['name'],
             'cover': album['images'][0]['url'],
             'id': album['id'],
-        } for album in albums_result
+        } for album in album_results
     ]
 
     # # get similar artists
