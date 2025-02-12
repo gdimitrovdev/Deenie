@@ -10,9 +10,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
-from django.views.decorators.csrf import csrf_exempt
 
-from app.models import Playlist, Song, URIs
+from app.models import Playlist, PlaylistSong
 from app.forms import PlaylistForm, SearchForm
 
 
@@ -33,7 +32,7 @@ def index(request):
     # get current user's playlists from database
     playlists = request.user.playlists.all()
     # form for creating playlists
-    form = PlaylistForm()
+    playlist_form = PlaylistForm()
     # form for searching
     search_form = SearchForm()
 
@@ -75,7 +74,7 @@ def index(request):
 
     context = {
         'playlists': playlists,
-        'form': form,
+        'playlist_form': playlist_form,
         'search_form': search_form,
         'album_info': album_info,
         'username': username,
@@ -109,13 +108,13 @@ def register(request):
 
 def add(request):
     # get the form for creating new playlist
-    form=PlaylistForm()
+    playlist_form = PlaylistForm()
 
-    #create the new playlist
-    if request.method=="POST":
-        form=PlaylistForm(request.POST)
-        if form.is_valid():
-            new_playlist=Playlist(text=request.POST['text'], user=request.user)
+    # create the new playlist
+    if request.method == 'POST':
+        playlist_form = PlaylistForm(request.POST)
+        if playlist_form.is_valid():
+            new_playlist = Playlist(name=request.POST['name'], user=request.user)
             new_playlist.save()
 
     return redirect('../')
@@ -204,12 +203,12 @@ def select(request, id, title):
     return render(request, 'app/select.html', context)
 
 
-def addtopl(request, playlist_id, id, title):
+def addtopl(request, playlist_id, song_id, title):
     # add song to selected playlist
-    playlistSelected=request.user.playlists.get(pk=playlist_id)
-    song=Song(url=id, playlist=playlistSelected, title=title)
+    playlist_selected = request.user.playlists.get(pk=playlist_id)
+    song = PlaylistSong(spotify_id=song_id, playlist=playlist_selected)
     song.save()
-    return redirect('../../../../')
+    return redirect('/')
 
 
 def removefrompl(request, playlist_id, song_id):

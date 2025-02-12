@@ -157,18 +157,18 @@
     </div>
     <div class="pldiv">
         <h1>My playlists</h1>
-        <form action="{%url 'add'%}" method="post">
-            {%csrf_token%}
-            {{form}}
+        <form action="{% url 'add' %}" method="post">
+            {% csrf_token %}
+            {{ playlist_form }}
             <button class="plbtn" type="submit">+</button>
         </form>
         <table>
-            {%for playlist in playlists%}
+            {% for playlist in playlists %}
                 <tr>
-                    <td class="td1"><a href="{%url 'playlist' playlist.id%}">{{playlist.text}}</a></td>
-                    <td><a href="{%url 'delete' playlist.id%}">Delete playlist</a></td>
+                    <td class="td1"><a href="{% url 'playlist' playlist.id %}">{{ playlist.text }}</a></td>
+                    <td><a href="{% url 'delete' playlist.id %}">Delete playlist</a></td>
                 </tr>
-            {%endfor%}
+            {% endfor %}
         </table>
     </div>
     <div class="pldiv2">
@@ -184,7 +184,7 @@
     </div>
     <div class="pldiv3">
         <h1>Your account</h1>
-        <p style="color:white; font-size:20px;">{{username}}</p>
+        <p style="color:white; font-size:20px;">{{ username }}</p>
         <form method="post" action="{% url 'logout' %}?next=/" style="display: inline;">
             {% csrf_token %}
             <button type="submit" class="btn lgout">Logout</button>
