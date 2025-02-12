@@ -77,17 +77,17 @@
     </div>
     <div class="results">
         <h1>Songs:</h1>
-        <table>
-        {%for song in songs%}
-            <tr>
-                <div class="vid">
-                    <td><a href="{%url 'more' song.url song.title%}"><img height="100" width="100" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Music_player_logo.png"></a></td>
-                    <td><a href="{%url 'more' song.url song.title%}"><p style="display:inline;">{{song.title}}</p></a></td>
-                </div>
-                <td><a href="{%url 'removefrompl' playlist.id song.id%}">Remove</a></td>
-            </tr>
-        {%endfor%}
-        </table>
+            <table>
+                {%for song in songs%}
+                    <tr>
+                        <div class="vid">
+                            <td><a href="{% url 'song' song.url %}"><img height="100" width="100" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Music_player_logo.png"></a></td>
+                            <td><a href="{% url 'song' song.url %}"><p style="display:inline;">{{ song.title }}</p></a></td>
+                        </div>
+                        <td><a href="{%url 'removefrompl' playlist.id song.id%}">Remove</a></td>
+                    </tr>
+                {%endfor%}
+            </table>
         <br>
     </div>
     <a href="../" class="button">Back</a>

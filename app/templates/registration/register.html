@@ -82,9 +82,9 @@
         <p style="float:right; margin-top:35px; margin-right:10px;">The only music site you need!</p>
     </div>
     <div class="page">
-        <form action="{%url 'register'%}" method="post" style="margin-left:10px;">
-            {%csrf_token%}
-            {{form.as_p}}
+        <form action="{% url 'register' %}" method="post" style="margin-left:10px;">
+            {% csrf_token %}
+            {{ form.as_p }}
             <button type="submit" class="btn">Sign up</button>
         </form>
     </div>
