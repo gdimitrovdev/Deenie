@@ -88,8 +88,8 @@
                 {% for song in songs %}
                     <tr>
                             <div class="vid">
-                                <td><a href="{% url 'more' song.id song.name %}"><img src="{{ song.cover }}" height='170px;'></a></td>
-                                <td><a href="{% url 'more' song.id song.name %}"><p style="display:inline; vertical-align: middle;">{{ song.name }}</p></a></td>
+                                <td><a href="{% url 'song' song.id %}"><img src="{{ song.cover }}" height='170px;'></a></td>
+                                <td><a href="{% url 'song' song.id %}"><p style="display:inline; vertical-align: middle;">{{ song.name }}</p></a></td>
                             </div>
                         <td><a href="{% url 'select' song.id song.name %}">Add to playlist</a></td>
                     </tr>

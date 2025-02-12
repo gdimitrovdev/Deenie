@@ -88,18 +88,18 @@ def index(request):
 
 def register(request):
     # get the registration form
-    form=UserCreationForm()
+    form = UserCreationForm()
 
     # register a new user
-    if request.method=="POST":
-        form=UserCreationForm(request.POST)
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            username=form.cleaned_data['username']
-            password=form.cleaned_data['password1']
-            user=authenticate(username=username, password=password)
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            user = authenticate(username=username, password=password)
             login(request, user)
-            return redirect('../')
+            return redirect('/')
 
     context = {
         'form': form
@@ -221,103 +221,58 @@ def removefrompl(request, playlist_id, song_id):
 
 
 # render a page for the selected song
-@csrf_exempt
-def more(request,song_url,title):
-    # search spotify for details of the song (danceability, tempo etc.)
-    try:
-        ss = title
-        ss=ss.split('ft.')
-        ss=ss[0]
-        if ss.__contains__('('):
-            q = ss[0:ss.index('(')]
-        elif ss.__contains__('['):
-            q = ss[0:ss.index('[')]
-        elif ss.__contains__('{'):
-            q = ss[0:ss.index('{')]
-        else:
-            q = ss
-        query = spotify.search(q, 1, 0, 'track')
-        song_uri = query['tracks']['items'][0]['uri']
-        track = spotify.track(song_uri)
-        track_data = spotify.audio_features(song_uri)
-        song_popularity = track['popularity']
-        song_danceability = int(track_data[0]['danceability']*100)
-        song_tempo = int(track_data[0]['tempo'])
-
-        # find similar artists to the current one
-        artist_uri = spotify.track(song_uri)['album']['artists'][0]['uri']
-        artist = spotify.artist(artist_uri)['name']
-        similar_artists = []
-        pictures=[]
-        endofrow=[]
-        image=track['album']['images'][1]['url']
-        for i in range(5):
-            similar_artists.append(spotify.artist_related_artists(artist_uri)['artists'][i]['name'])
-            pictures.append(spotify.artist_related_artists(artist_uri)['artists'][i]['images'][2]['url'])
-            if i==1 or i==4:
-                endofrow.append(True)
-            else:
-                endofrow.append(False)
-        real_title=track['name']
-        artists=zip(similar_artists,pictures,endofrow)
-        new_uri=URIs(uri=song_uri, user=request.user)
-        new_uri.save()
-        isfound=True
-    except:
-        song_popularity="-"
-        song_danceability ="-"
-        song_tempo ="-"
-        artist=''
-        similar_artists=['','','','','']
-        pictures=['','','','','']
-        endofrow=['','','','','']
-        artists = zip(similar_artists, pictures,endofrow)
-        image=''
-        real_title=title
-        isfound=False
-
-    '''
-    If a user got to this page with an url of the song that is equal to 1, this means that instead of the youtube url we
-    redirected to this function using argument 1.
-    
-    In the "albums" page we are redirecting to the "more" page using an url equal to one as it takes a lot of time to 
-    find the url for every single song and this slows the site down. Instead we go to the more page and find the youtube
-    url here.
-    '''
-    if song_url == '1':
-        results1 = VideosSearch(title, limit=3).result()['result']
-        song_url = results1[0]['id']
+def song(request, id):
     search_form = SearchForm()
-    url = 'https://www.youtube.com/watch?v=' + str(song_url)
-    
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'noplaylist': True,
+
+    song_result = spotify.track(id)
+
+    audio_url = ''
+
+    youtube_result = VideosSearch(song_result['name'], limit=1).result()
+    if youtube_result['result']:
+        video_url = youtube_result['result'][0]['link']
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'noplaylist': True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=False)
+            audio_url = info['url']
+
+    song = {
+        'id': id,
+        'name': song_result['name'],
+        'audio_url': audio_url,
+        'cover': song_result['album']['images'][0]['url'],
+        'artist': ', '.join(artist['name'] for artist in song_result['artists']),
+        'artist_id': song_result['artists'][0]['id'],
     }
-    ydl = yt_dlp.YoutubeDL(ydl_opts)
-    info = ydl.extract_info(song_url, download=False)
-    audio_url = info['url']
 
-    if image == '':
-        image = results1[0]['thumbnails'][0]['url']
+    # find similar artists to the current one
+    # artist_uri = spotify.track(song_uri)['album']['artists'][0]['uri']
+    # artist = spotify.artist(artist_uri)['name']
+    # similar_artists = []
+    # pictures=[]
+    # endofrow=[]
+    # image=track['album']['images'][1]['url']
+    # for i in range(5):
+    #     similar_artists.append(spotify.artist_related_artists(artist_uri)['artists'][i]['name'])
+    #     pictures.append(spotify.artist_related_artists(artist_uri)['artists'][i]['images'][2]['url'])
+    #     if i==1 or i==4:
+    #         endofrow.append(True)
+    #     else:
+    #         endofrow.append(False)
+    # real_title=track['name']
+    # artists=zip(similar_artists,pictures,endofrow)
+    # new_uri=URIs(uri=song_uri, user=request.user)
+    # new_uri.save()
+    # isfound=True
 
-    # get all song details together
-    details = {'popularity': song_popularity,
-               'danceability': song_danceability,
-               'tempo': song_tempo,
-               'artist': artist,
-               'artists': artists,
-               'image': image,
-               'isfound': isfound
-               }
-
-    context = {'url': song_url,
-               'song_title': real_title,
-               'details': details,
-               'search_form': search_form,
-               'real_url': audio_url,
-               }
-    return render(request, 'app/more.html', context)
+    context = {
+        'song': song,
+        'search_form': search_form,
+    }
+    return render(request, 'app/song.html', context)
 
 
 # a function that allows us to refresh the current page

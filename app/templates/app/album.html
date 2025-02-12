@@ -118,7 +118,7 @@
             {% for track in tracks %}
                <tr>
                     <div class="vid">
-                        <td><a href="{% url 'more' track.id track.name %}" class="song"><p style="display:inline; vertical-align: middle;">{{ track.name }}</p></a></td>
+                        <td><a href="{% url 'song' track.id %}" class="song"><p style="display:inline; vertical-align: middle;">{{ track.name }}</p></a></td>
                     </div>
                    <td class="space"><a href="{% url 'select' track.id track.name %}" class="playlist">Add to playlist</a></td>
                </tr>
