@@ -69,27 +69,66 @@
 </head>
 <body>
     <div class="topnav">
-        <a href="../../"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
-        <form class="form" action="{%url 'search'%}" method="post">
-            {%csrf_token%}
-            {{search_form}}
+        <a href="{% url 'index' %}"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
+        <form class="form" action="{% url 'search' %}" method="post">
+            {% csrf_token %}
+            {{ search_form }}
         </form>
     </div>
     <div class="results">
         <h1>Songs:</h1>
-        <table>
-        {%for song in songs%}
-            <tr>
-                <div class="vid">
-                    <td><a href="{%url 'more' song.url song.title%}"><img height="100" width="100" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Music_player_logo.png"></a></td>
-                    <td><a href="{%url 'more' song.url song.title%}"><p style="display:inline;">{{song.title}}</p></a></td>
-                </div>
-                <td><a href="{%url 'removefrompl' playlist.id song.id%}">Remove</a></td>
-            </tr>
-        {%endfor%}
-        </table>
+            <table>
+                {% for song in songs %}
+                    <tr id="song-row-{{ song.id }}">
+                        <div class="vid">
+                            <td><a href="{% url 'song' song.spotify_id %}"><img height="100" width="100" src="{{ song.cover }}"></a></td>
+                            <td><a href="{% url 'song' song.spotify_id %}"><p style="display:inline;">{{ song.name }}</p></a></td>
+                        </div>
+                        <td><a href="{%url 'remove_from_playlist' song.id playlist.id%}" class="remove-song-button">Remove</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
         <br>
     </div>
-    <a href="../" class="button">Back</a>
+    <a href="{% url 'index' %}" class="button">Back</a>
+
+    <script>
+        function addDeleteListener(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = button.href;
+            
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response error');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.song_id) {
+                        document.getElementById(`song-row-${data.song_id}`).remove()
+                    } else {
+                        alert('Error removing song. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing the song from the playlist.');
+                });
+            });
+        }
+    </script>
+
+    <script>
+        let buttons = document.getElementsByClassName('remove-song-button');
+        for (let button of buttons) {
+            addDeleteListener(button);
+        }
+    </script>
 </body>
 </html>

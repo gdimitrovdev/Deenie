@@ -126,19 +126,19 @@
         <a href="../../"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
         <form class="form" action="{%url 'search'%}" method="post">
             {%csrf_token%}
-            {{search_form}}
+            {{ search_form }}
         </form>
     </div>
     <div style="float:left; margin-right:15px;">
         <div class="artist">
-            <img height="300px" style="border-radius:6px;" src="{{image}}">
+            <img height="300px" style="border-radius:6px;" src="{{ artist_info.image }}">
             <div class="details">
-                <h1>{{name}}</h1>
-                <p>Followers: {{followers}}</p>
-                <p>Popularity: {{popularity}}</p>
+                <h1>{{ artist_info.name }}</h1>
+                <p>Followers: {{ artist_info.followers }}</p>
+                <p>Popularity: {{ artist_info.popularity }}</p>
             </div>
         </div>
-        <div class="similar">
+        {% comment %} <div class="similar">
             <div class='similar-artist'>Similar artists:</div>
             {%for artist,pic,endofrow in similar%}
             {%if endofrow%}
@@ -165,18 +165,18 @@
             </a>
             {%endif%}
             {%endfor%}
-        </div>
+        </div> {% endcomment %}
     </div>
     <div class="albums">
         <h1>Albums:</h1>
-        {%for album, pic in albpic%}
-        <a href="{%url 'album' album name%}">
-            <div class="album">
-                <img height="130px" src="{{pic}}">
-                <br>
-                <p>{{album}}</p>
-            </div>
-        </a>
+        {% for album in albums %}
+            <a href="{% url 'album' album.id %}">
+                <div class="album">
+                    <img height="130px" src="{{ album.cover }}">
+                    <br>
+                    <p>{{ album.name }}</p>
+                </div>
+            </a>
         {%endfor%}
     </div>
     <div id="footer" style="float:left">
