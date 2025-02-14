@@ -157,9 +157,12 @@
                     <div class="vid">
                         <td><a href="{% url 'song' track.id %}" class="song"><p style="display:inline; vertical-align: middle;">{{ track.name }}</p></a></td>
                     </div>
-                    <td class="space">
-                        <button class="playlist add-to-playlist-btn" data-song-id="{{ track.id }}">Add to playlist</button>
-                    </td>
+                    {% if user %}
+                        <td class="space">
+                            <button class="playlist add-to-playlist-btn" data-song-id="{{ track.id }}">Add to playlist</button>
+                        </td>
+                    {% else%}
+                    {% endif %}
                </tr>
             {%endfor%}
            </table>
@@ -168,17 +171,17 @@
     <div style="float:left">
         <h1 class="heading">Similar albums:</h1>
         {%for album, picture, artist in similar%}
-        <div class="float">
-            <table>
-                <tr>
-                    <td class="row"><a href="{%url 'album' album artist%}"><img class="img" height="180px" width="180px" src="{{picture}}"></a></td>
-                    <td class="row">
-                        <p><a href="{%url 'album' album artist%}">{{album}}</a></p>
-                        <p class="namehover"><a href="{%url 'artist' artist%}">{{artist}}</a></p>
-                    </td>
-                </tr>
-            </table>
-        </div>
+            <div class="float">
+                <table>
+                    <tr>
+                        <td class="row"><a href="{%url 'album' album artist%}"><img class="img" height="180px" width="180px" src="{{picture}}"></a></td>
+                        <td class="row">
+                            <p><a href="{%url 'album' album artist%}">{{album}}</a></p>
+                            <p class="namehover"><a href="{%url 'artist' artist%}">{{artist}}</a></p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         {%endfor%}
     </div>
     <div id="footer" style="float:left">
