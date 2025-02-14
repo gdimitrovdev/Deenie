@@ -6,10 +6,12 @@ import spotipy
 from youtubesearchpython import VideosSearch
 from spotipy.oauth2 import SpotifyClientCredentials
 import yt_dlp
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
+from django.views.decorators.http import require_POST
 
 from app.models import Playlist, PlaylistSong
 from app.forms import PlaylistForm, SearchForm
@@ -106,7 +108,7 @@ def register(request):
     return render(request, 'registration/register.html', context)
 
 
-def add(request):
+def create_playlist(request):
     # get the form for creating new playlist
     playlist_form = PlaylistForm()
 
@@ -116,27 +118,50 @@ def add(request):
         if playlist_form.is_valid():
             new_playlist = Playlist(name=request.POST['name'], user=request.user)
             new_playlist.save()
+            return JsonResponse({
+                'playlist': {
+                    'id': new_playlist.id,
+                    'name': new_playlist.name,
+                },
+            })
 
-    return redirect('../')
+    return JsonResponse()
 
 
-def delete(request, playlist_id):
+def delete_playlist(request, id):
     # delete playlist by id
-    playlist=request.user.playlists.get(pk=playlist_id)
+    playlist = request.user.playlists.get(pk=id)
     playlist.delete()
 
-    return redirect('../../')
+    return JsonResponse({
+        'id': id,
+    })
 
 
-def playlist(request, playlist_id):
+def playlist(request, id):
     # get the search form
-    search_form=SearchForm()
+    search_form = SearchForm()
 
     # get the playlist and show it's songs
-    playlist=request.user.playlists.get(pk=playlist_id)
-    songs=playlist.songs.all()
+    playlist = request.user.playlists.get(pk=id)
+    songs_in_playlist = playlist.songs.all()
 
-    context={'songs':songs, 'playlist':playlist, 'search_form':search_form}
+    songs = []
+    for song in songs_in_playlist:
+        song_result = spotify.track(song.spotify_id)
+
+        songs.append({
+            'id': song.id,
+            'spotify_id': song_result['id'],
+            'name': song_result['name'],
+            'cover': song_result['album']['images'][0]['url']
+        })
+
+    context = {
+        'songs': songs, 
+        'playlist': playlist, 
+        'search_form': search_form,
+    }
     return render(request, 'app/playlist.html',context)
 
 
@@ -178,7 +203,7 @@ def search(request):
                     artist_result = {
                         'id': artist['id'],
                         'name': artist['name'],
-                        'picture': album['images'][0]['url'],
+                        'picture': artist['images'][0]['url'],
                     }
 
                     artist_results.append(artist_result)
@@ -191,32 +216,44 @@ def search(request):
         'albums': album_results,
         'artists': artist_results,
         'search_form': search_form,
+        'playlists': request.user.playlists.all(),
     }
     return render(request, 'app/search.html', context)
 
 
-def select(request, id, title):
-    # select playlist to add current song to
-    playlists=request.user.playlists.all()
-    form=SearchForm()
-    context={'playlists':playlists, 'id':id, 'title':title, 'search_form':form}
-    return render(request, 'app/select.html', context)
+@require_POST
+def add_to_playlist(request):
+    song_id = request.POST.get('song_id')
+    playlist_ids = request.POST.getlist('playlist_ids', [])
+    
+    if not song_id or not playlist_ids:
+        return JsonResponse({'error': 'Missing parameters'}, status=400)
+    
+    try:
+        for playlist_id in playlist_ids:
+            playlist = request.user.playlists.get(id=playlist_id)
+            PlaylistSong.objects.create(spotify_id=song_id, playlist=playlist)
+    except Playlist.DoesNotExist:
+        return JsonResponse({'error': 'Playlist not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({
+        'message': f'Song added to {len(playlist_ids)} playlist(s) successfully!',
+        'song_id': song_id,
+        'playlist_ids': playlist_ids
+    })
 
 
-def addtopl(request, playlist_id, song_id, title):
-    # add song to selected playlist
-    playlist_selected = request.user.playlists.get(pk=playlist_id)
-    song = PlaylistSong(spotify_id=song_id, playlist=playlist_selected)
-    song.save()
-    return redirect('/')
-
-
-def removefrompl(request, playlist_id, song_id):
+def remove_from_playlist(request, song_id, playlist_id):
     # remove song from playlist
-    playlistSelected=request.user.playlists.get(pk=playlist_id)
-    songToDel=playlistSelected.songs.get(pk=song_id)
-    songToDel.delete()
-    return redirect('../../../playlist/'+str(playlist_id))
+    playlist_selected = request.user.playlists.get(pk=playlist_id)
+    song_to_delete = playlist_selected.songs.get(pk=song_id)
+    song_to_delete.delete()
+    return JsonResponse({
+        'playlist_id': playlist_id,
+        'song_id': song_id,
+    })
 
 
 # render a page for the selected song
@@ -327,6 +364,7 @@ def album(request, id):
         'album': album_info,
         'tracks': tracks,
         'search_form': search_form,
+        'playlists': request.user.playlists.all(),
         # 'similar':zip(albums,similar_pictures,similar_names)
     }
     return render(request, 'app/album.html', context)
