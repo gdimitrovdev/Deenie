@@ -29,10 +29,12 @@ client_credentials_manager = SpotifyClientCredentials(
 spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
-@login_required
 def index(request):
     # get current user's playlists from database
-    playlists = request.user.playlists.all()
+    if not request.user.is_anonymous:
+        playlists = request.user.playlists.all()
+    else:
+        playlists = []
     # form for creating playlists
     playlist_form = PlaylistForm()
     # form for searching
@@ -80,6 +82,7 @@ def index(request):
         'search_form': search_form,
         'album_info': album_info,
         'username': username,
+        'user': not request.user.is_anonymous,
         # 'uris': uris,
         # 'zip': recommended_zip,
         # 'is_found': is_found,
@@ -108,6 +111,7 @@ def register(request):
     return render(request, 'registration/register.html', context)
 
 
+@login_required
 def create_playlist(request):
     # get the form for creating new playlist
     playlist_form = PlaylistForm()
@@ -128,6 +132,7 @@ def create_playlist(request):
     return JsonResponse()
 
 
+@login_required
 def delete_playlist(request, id):
     # delete playlist by id
     playlist = request.user.playlists.get(pk=id)
@@ -138,6 +143,7 @@ def delete_playlist(request, id):
     })
 
 
+@login_required
 def playlist(request, id):
     # get the search form
     search_form = SearchForm()
@@ -210,17 +216,24 @@ def search(request):
         
     else:
         return redirect('/')
+    
+    if not request.user.is_anonymous:
+        playlists = request.user.playlists.all()
+    else:
+        playlists = []
 
     context = {
         'songs': song_results,
         'albums': album_results,
         'artists': artist_results,
         'search_form': search_form,
-        'playlists': request.user.playlists.all(),
+        'playlists': playlists,
+        'user': not request.user.is_anonymous,
     }
     return render(request, 'app/search.html', context)
 
 
+@login_required
 @require_POST
 def add_to_playlist(request):
     song_id = request.POST.get('song_id')
@@ -245,6 +258,7 @@ def add_to_playlist(request):
     })
 
 
+@login_required
 def remove_from_playlist(request, song_id, playlist_id):
     # remove song from playlist
     playlist_selected = request.user.playlists.get(pk=playlist_id)
@@ -360,11 +374,17 @@ def album(request, id):
 
     search_form = SearchForm()
 
+    if not request.user.is_anonymous:
+        playlists = request.user.playlists.all();
+    else:
+        playlists = []
+
     context = {
         'album': album_info,
         'tracks': tracks,
         'search_form': search_form,
-        'playlists': request.user.playlists.all(),
+        'playlists': playlists,
+        'user': not request.user.is_anonymous,
         # 'similar':zip(albums,similar_pictures,similar_names)
     }
     return render(request, 'app/album.html', context)

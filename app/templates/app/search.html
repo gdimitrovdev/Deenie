@@ -128,11 +128,14 @@
                             <td><a href="{% url 'song' song.id %}"><img src="{{ song.cover }}" height='170px;'></a></td>
                             <td><a href="{% url 'song' song.id %}"><p style="display:inline; vertical-align: middle;">{{ song.name }}</p></a></td>
                         </div>
-                        <td class="space">
-                            <button class="playlist add-to-playlist-btn" data-song-id="{{ song.id }}">Add to playlist</button>
-                        </td>
+                        {% if user %}
+                            <td class="space">
+                                <button class="playlist add-to-playlist-btn" data-song-id="{{ song.id }}">Add to playlist</button>
+                            </td>
+                        {% else %}
+                        {% endif %}
                     </tr>
-                {%endfor%}
+                {% endfor %}
             </table>
         {% else %}
             <p>No songs with this name found</p>

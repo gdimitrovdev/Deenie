@@ -157,20 +157,25 @@
     </div>
     <div class="pldiv">
         <h1>My playlists</h1>
-        <form action="{% url 'create_playlist' %}" method="post" id="playlist-form">
-            {% csrf_token %}
-            {{ playlist_form }}
-            <button class="plbtn" type="submit">+</button>
-        </form>
-        <table class="playlists-table">
-            {% for playlist in playlists %}
-                <tr id="playlist-row-{{ playlist.id }}">
-                    <td class="td1"><a href="{% url 'playlist' playlist.id %}">{{ playlist.name }}</a></td>
-                    <td><a class='delete-playlist-button' href="{% url 'delete_playlist' playlist.id %}">Delete playlist</a></td>
-                </tr>
-            {% endfor %}
-        </table>
+        {% if user %}
+            <form action="{% url 'create_playlist' %}" method="post" id="playlist-form">
+                {% csrf_token %}
+                {{ playlist_form }}
+                <button class="plbtn" type="submit">+</button>
+            </form>
+            <table class="playlists-table">
+                {% for playlist in playlists %}
+                    <tr id="playlist-row-{{ playlist.id }}">
+                        <td class="td1"><a href="{% url 'playlist' playlist.id %}">{{ playlist.name }}</a></td>
+                        <td><a class='delete-playlist-button' href="{% url 'delete_playlist' playlist.id %}">Delete playlist</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <a href="{% url 'login' %}">Log in</a>
+        {% endif %}
     </div>
+
     <div class="pldiv2">
         <h1>Artist and album you should check out:</h1>
         <a href="{% url 'artist' album_info.artist_id %}" style="color:#FFFFFF; text-decoration:none;"><p class="hoverlink">{{ album_info.artist }}</p></a>
@@ -182,22 +187,28 @@
         <br>
         <a style="color:#FFFFFF; text-align:right" href="{% url 'refresh' %}" class="hoverlink">Other recommendation</a>
     </div>
-    <div class="pldiv3">
-        <h1>Your account</h1>
-        <p style="color:white; font-size:20px;">{{ username }}</p>
-        <form method="post" action="{% url 'logout' %}?next=/" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn lgout">Logout</button>
-        </form>
-    </div>
+
+    {% if user %}
+        <div class="pldiv3">
+
+                <h1>Your account</h1>
+                <p style="color:white; font-size:20px;">{{ username }}</p>
+                <form method="post" action="{% url 'logout' %}?next=/" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn lgout">Logout</button>
+                </form>
+        </div>
+    {% else %}
+    {% endif %}
+
     <div class="container">
         {%if isFound%}
             {%for name, artist, picture, album in zip%}
-            <div class="rsong">
-                <a href="{%url 'more' 1 name%}"><p>{{name}}</p></a>
-                <a href="{%url 'artist' artist%}"><p>{{artist}}</p></a>
-                <a href="{%url 'album' album artist%}"><img height="230px" src="{{picture}}"></a>
-            </div>
+                <div class="rsong">
+                    <a href="{%url 'more' 1 name%}"><p>{{name}}</p></a>
+                    <a href="{%url 'artist' artist%}"><p>{{artist}}</p></a>
+                    <a href="{%url 'album' album artist%}"><img height="230px" src="{{picture}}"></a>
+                </div>
             {%endfor%}
         {%endif%}
     </div>

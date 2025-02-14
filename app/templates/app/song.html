@@ -59,7 +59,7 @@
             color:#FFFFFF;
             font-family: Arial, Helvetica, sans-serif;
         }
-        .Drake{
+        .artist-p {
             color:#FFFFFF;
             font-size:23px;
         }
@@ -129,7 +129,7 @@
                 </td>
                 <td class="td">
                     <h1>{{ song.name }}</h1>
-                    <a href="{% url 'artist' song.artist_id %}"><p class="Drake">{{ song.artist }}</p></a>
+                    <a href="{% url 'artist' song.artist_id %}"><p class="artist-p">{{ song.artist }}</p></a>
                 </td>
             </tr>
             <tr>

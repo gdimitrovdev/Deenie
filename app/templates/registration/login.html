@@ -77,7 +77,7 @@
     </div>
     <div class="page">
         <form method="post" style="text-align:center;">
-            {%csrf_token%}
+            {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn">Login</button>
             <a href="{% url 'register' %}">Sign up</a>
