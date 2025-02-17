@@ -1,0 +1,50 @@
+.logout-button {
+    font-size: 16px;
+    background-color: #8600e6;
+    border-radius: 4px;
+    padding: 5px 10px;
+}
+
+.playlist-name-cell {
+    border-right: 1px solid #FFFFFF;
+    width: 100px;
+    text-align: left;
+}
+
+.playlist-form {
+    border: 2px solid #000000;
+    border-radius: 8px;
+    padding: 4px 10px;
+}
+.add-playlist-button {
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+    background-color: #4B0082;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.playlist-container {
+    margin:20px;
+    padding:20px;
+    border:1px solid #FFFFFF;
+    border-radius:8px;
+    overflow:hidden;
+    float:left;
+}
+.recommended-container {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #FFFFFF;
+    border-radius: 8px;
+    overflow: hidden;
+    float: left;
+}
+.account-container {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #FFFFFF;
+    border-radius: 8px;
+    overflow: hidden;
+}

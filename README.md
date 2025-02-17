@@ -36,7 +36,7 @@ This project is a music streaming web application, allowing user to listen to mu
     ```
 
 5. Setup environmental variables
-    - Copy the .env.sample file into a new .env file and fill out the missing Spotipy API variables.
+    - Copy the .env.sample file into a new .env file and fill out the missing Spotipy API variables. The secret key can be any value you want.
     - If you want to use a custom PostgreSQL database instead of an in-memory one, change the DEBUG environmental variable to False and set the database environmental variables as well.
 
 6. Run migrations

@@ -1,172 +1,23 @@
+{% extends "base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body{
-            background-color:#4B0082;
-        }
-        .topnav{
-            overflow:hidden;
-            border:1px solid #000000;
-            background-color:#FFFFFF;
-            border-radius:8px;
-        }
-        .logo{
-            border-radius:7px;
-            margin:20px;
-        }
-        .form{
-            float:right;
-            margin:30px;
-        }
-        .search{
-            background-image: url('https://s3.us-east-2.amazonaws.com/upload-icon/uploads/icons/png/19850389861579252561-256.png');
-            background-size:20px 20px;
-            background-repeat: no-repeat;
-            border:2px solid #4B0082;
-            border-radius:8px;
-            padding: 4px 10px;
-            text-align:left;
-            padding-left: 23px;
-            width:65px;
-        }
-        .search:focus{
-            outline-width: 0;
-        }
-        .btn{
-            background-color:#4B0082;
-            color:#FFFFFF;
-            border:2px #4B0082;
-            border-top-right-radius:8px;
-            border-bottom-right-radius:8px;
-            padding: 6px 10px;
-            margin:0px;
-        }
-        a{
-            text-decoration:none;
-            color:#FFFFFF;
-        }
-        .logout{
-            float:right;
-            color:#4B0082;
-            padding:10px;
-        }
-        h1{
-            color:#FFFFFF;
-        }
-        .pldiv{
-            margin:20px;
-            padding:20px;
-            border:1px solid #FFFFFF;
-            border-radius:8px;
-            overflow:hidden;
-            float:left;
-        }
-        td{
-            padding:15 px;
-        }
-        .td1{
-            border-right:1px solid #FFFFFF;
-            width:100px;
-            text-align:left;
-        }
-        .plform{
-            border:2px solid #000000;
-            border-radius:8px;
-            padding: 4px 10px;
-        }
-        .plbtn{
-            border:2px solid #FFFFFF;
-            color:#FFFFFF;
-            background-color:#4B0082;
-            border-radius:12px;
-            font-size:16px;
-            font-weight:bold;
-        }
-        .pldiv2{
-            margin:20px;
-            padding:20px;
-            border:1px solid #FFFFFF;
-            border-radius:8px;
-            overflow:hidden;
-            display:inline-block;
-            float:left;
-        }
-        .lgout{
-            font-size:16px;
-            background-color: #8600e6;
-            border-radius: 4px;
-            padding: 5px 10px;
-         }
-        .footer{
-            position:fixed;
-            bottom:30px;
-            text-align:center;
-            width:100%;
-        }
-        .pldiv3{
-            margin:20px;
-            padding:20px;
-            border:1px solid #FFFFFF;
-            border-radius:8px;
-            overflow:hidden;
-        }
-        .hoverlink:hover{
-            text-decoration:underline;
-        }
-        .container{
-            float:left;
-            clear:both;
-            width:100%;
-            text-align:center;
-        }
-        .rsong{
-            background-color:#8600e6;
-            border-radius:10px;
-            display:inline-block;
-            margin:0px 20px;
-        }
-        .rsong img{
-            padding:0px 10px;
-        }
-        .rsong p, .rsong a{
-            color:white;
-        }
-        .rsong p:hover{
-            text-decoration:underline;
-        }
-        @media screen and (max-width:600px){
-            .rsong{
-                margin:15px 20px !important;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="topnav">
-        <a href="#"><img class="logo" src="https://i.postimg.cc/dt09j9HX/LogoOG.png" height="43" width="122"></a>
-        <form class="form" action="{%url 'search'%}" method="post">
-            {%csrf_token%}
-            {{search_form}}
-        </form>
-    </div>
-    <div class="pldiv">
+{% block css %}
+    <link rel="stylesheet" href="{% static 'app/css/index.css' %}"
+{% endblock css %}
+
+{% block content %}
+    <div class="playlist-container">
         <h1>My playlists</h1>
         {% if user %}
             <form action="{% url 'create_playlist' %}" method="post" id="playlist-form">
                 {% csrf_token %}
                 {{ playlist_form }}
-                <button class="plbtn" type="submit">+</button>
+                <button class="add-playlist-button" type="submit">+</button>
             </form>
             <table class="playlists-table">
                 {% for playlist in playlists %}
                     <tr id="playlist-row-{{ playlist.id }}">
-                        <td class="td1"><a href="{% url 'playlist' playlist.id %}">{{ playlist.name }}</a></td>
+                        <td class="playlist-name-cell"><a href="{% url 'playlist' playlist.id %}">{{ playlist.name }}</a></td>
                         <td><a class='delete-playlist-button' href="{% url 'delete_playlist' playlist.id %}">Delete playlist</a></td>
                     </tr>
                 {% endfor %}
@@ -176,7 +27,7 @@
         {% endif %}
     </div>
 
-    <div class="pldiv2">
+    <div class="recommended-container">
         <h1>Artist and album you should check out:</h1>
         <a href="{% url 'artist' album_info.artist_id %}" style="color:#FFFFFF; text-decoration:none;"><p class="hoverlink">{{ album_info.artist }}</p></a>
         <a href="{% url 'album' album_info.id %}"><p style="color:#FFFFFF" class="hoverlink">Album: {{ album_info.name }}</p></a>
@@ -189,13 +40,13 @@
     </div>
 
     {% if user %}
-        <div class="pldiv3">
+        <div class="account-container">
 
                 <h1>Your account</h1>
                 <p style="color:white; font-size:20px;">{{ username }}</p>
                 <form method="post" action="{% url 'logout' %}?next=/" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn lgout">Logout</button>
+                    <button type="submit" class="btn logout-button">Logout</button>
                 </form>
         </div>
     {% else %}
@@ -213,97 +64,12 @@
         {%endif%}
     </div>
 
-    <script>
-        function addDeleteListener(button) {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const url = button.href;
-            
-                fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response error');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.id) {
-                        document.getElementById(`playlist-row-${data.id}`).remove()
-                    } else {
-                        alert('Error deleting playlist. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the playlist.');
-                });
-            });
-        }
-    </script>
+    <script src="{% static 'app/js/delete-playlist.js' %}"></script>
 
     <script>
-        document.getElementById('playlist-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-        
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response error');
-                return response.json();
-            })
-            .then(data => {
-                if (data.playlist) {
-                    const playlist = data.playlist;
-                    const table = document.querySelector('.playlists-table');
-                    
-                    // Create new table row
-                    const newRow = document.createElement('tr');
-                    newRow.setAttribute("id", `playlist-row-${playlist.id}`);
-
-                    const urlPlaylist = "{% url 'playlist' 'maskstring' %}".replace('maskstring', playlist.id);
-                    const urlDeletePlaylist = "{% url 'delete_playlist' 'maskstring' %}".replace('maskstring', playlist.id);
-
-                    newRow.innerHTML = `
-                        <td class="td1">
-                            <a href="${urlPlaylist}">${playlist.name}</a>
-                        </td>
-                        <td>
-                            <a class="new-delete-playlist-button" href="${urlDeletePlaylist}">Delete playlist</a>
-                        </td>
-                    `;
-                    
-                    table.insertAdjacentElement('afterbegin', newRow);
-
-                    addDeleteListener(document.getElementsByClassName("new-delete-playlist-button")[0]);
-                    
-                    form.querySelector('[name="name"]').value = '';
-                } else {
-                    alert('Error creating playlist. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while creating the playlist.');
-            });
-        });
+        let playlistUrlMasked = "{% url 'playlist' 'maskstring' %}";
+        let deletePlaylistUrlMasked = "{% url 'delete_playlist' 'maskstring' %}";
     </script>
 
-    <script>
-        let buttons = document.getElementsByClassName('delete-playlist-button');
-        for (let button of buttons) {
-            addDeleteListener(button);
-        }
-    </script>
-</body>
-</html>
+    <script src="{% static 'app/js/create-playlist.js' %}"></script>
+{% endblock content %}
